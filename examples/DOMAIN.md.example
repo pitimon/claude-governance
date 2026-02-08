@@ -1,0 +1,59 @@
+# DOMAIN.md - [Project Name] Domain Model
+
+Machine-readable domain model for AI-assisted development. Reference this document when working with project entities, APIs, or data.
+
+## Core Entities
+
+### [Entity Name]
+Brief description of the entity's purpose.
+
+| Field | Type | Constraints |
+|-------|------|-------------|
+| id | integer | Auto-increment primary key |
+| name | string | Required, unique |
+| status | enum | `active`, `archived` |
+| created_at | string | ISO 8601 timestamp |
+
+**Invariants:**
+- `status` MUST be one of the allowed values
+- `name` MUST be unique across all records
+- Deleting an entity with active references MUST fail
+
+### [Another Entity]
+Brief description.
+
+| Field | Type | Constraints |
+|-------|------|-------------|
+| id | integer | Auto-increment primary key |
+| entity_id | integer | References [Entity Name] |
+| value | string | Required, max 1000 chars |
+
+**Invariants:**
+- `entity_id` MUST reference an existing entity
+- Cascade delete when parent entity is removed
+
+## API Contract Rules
+
+### Authentication
+- All endpoints require `Authorization` header
+- Invalid/missing credentials return `401 Unauthorized`
+
+### Pagination
+- Parameters: `page` (1-based, default 1), `limit` (default 20, max 100)
+- Response includes pagination metadata
+
+### Response Format
+```
+Success: { data: T[], pagination: { page, limit, total, totalPages } }
+Single:  { data: T }
+Error:   { error: string, status: number }
+```
+
+## Data Standards
+
+| Standard | Rule |
+|----------|------|
+| Timestamps | ISO 8601 format |
+| IDs | Auto-increment integers |
+| Text encoding | UTF-8 |
+| Naming | snake_case for fields, kebab-case for URLs |
