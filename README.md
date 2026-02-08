@@ -1,22 +1,45 @@
-# claude-governance
+# claude-governance v2.0
 
-**Governance skills for Claude Code** — shift from writing code to governing AI that writes code.
+**Complete governance framework for Claude Code** — shift from writing code to governing AI that writes code.
 
 > The developer's role is evolving. Instead of writing every line, you define *what* to build, set guardrails, and let AI implement within constraints. This plugin provides the tools for that workflow.
 
-## The Problem
+## What's Included
 
-AI coding assistants are powerful but lack structure. Without governance:
-- AI makes architectural decisions without context
-- Requirements live in chat messages that disappear
-- No systematic way to verify AI output meets standards
-- Decisions are untraceable — nobody knows *why* something was built that way
+| Component | Type | Description |
+|-----------|------|-------------|
+| **Session governance context** | Hook (SessionStart) | Injects Three Loops model + fitness functions into every session (~300 tokens) |
+| **Secret scanner** | Hook (PreToolUse) | Blocks file writes containing hardcoded secrets (API keys, tokens, passwords) |
+| `/governance-check` | Command | Run fitness function checks: pre-commit, pre-PR, architecture |
+| `/create-adr` | Command | Generate Architecture Decision Record with governance classification |
+| `/spec-driven-dev` | Skill | Specification-first development workflow |
+| `/governance-setup` | Skill | Initialize governance in any project (DOMAIN.md, ADRs, rules) |
+| `governance-reviewer` | Agent | Compliance review agent for code changes |
+| Example rules | Templates | 5 ready-to-use rules for `~/.claude/rules/` |
 
-## What This Plugin Provides
+## Installation
 
-### `/spec-driven-dev` — Specification-First Workflow
+```bash
+# Step 1: Add the marketplace
+claude plugin marketplace add pitimon/claude-governance
 
-A slash command that guides you through creating a formal specification before implementation. You define WHAT and constraints; AI generates HOW within guardrails.
+# Step 2: Install the plugin
+claude plugin install claude-governance@claude-governance
+```
+
+### Optional: Install Rules
+
+Copy governance rules to `~/.claude/rules/` for always-on fitness function enforcement:
+
+```bash
+# Install all 5 rules (governance, coding-style, git-workflow, testing, security)
+bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh
+
+# Or just the governance rule
+bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh --governance-only
+```
+
+## Core Concepts
 
 ### Three Loops Decision Model
 
@@ -32,27 +55,135 @@ Classify every task by the appropriate level of AI autonomy:
 
 "Unit tests for architecture" — automated checks at every stage:
 
-- **Pre-implementation**: Spec exists? Domain impact assessed? Autonomy level classified?
-- **Pre-commit**: No secrets? Input validated? Files under 800 lines?
-- **Pre-PR**: Conventional commits? Tests at 80%+? Breaking changes documented?
-- **Architecture**: Service boundaries? Rate limiting? Auth on all endpoints?
+- **Pre-commit**: No secrets, input validation, parameterized queries, file/function size limits, immutability, no console.log
+- **Pre-PR**: Conventional commits, DOMAIN.md consistency, test coverage >= 80%, TODO context
+- **Architecture**: Service boundaries, error message safety, auth coverage, rate limiting
 
-### Architecture Decision Records (ADRs)
+### Spec-Driven Development
 
-Lightweight templates for recording *why* decisions were made, with governance classification:
+Developer defines WHAT + constraints. AI implements HOW within guardrails:
 
-```markdown
-# ADR-001: [Decision Title]
-## Status: Accepted
-## Context: What motivated this decision?
-## Decision: What did we decide?
-## Consequences: What trade-offs?
-## Governance:
-- Decision Loop: On-the-Loop
-- Fitness Function: How to verify compliance
+1. **Understand** — explore codebase, clarify requirements
+2. **Specify** — write `spec.md` with requirements, constraints, acceptance criteria
+3. **Plan** — generate implementation plan from spec
+4. **Implement** — code in iterations with human oversight
+5. **Verify** — check against acceptance criteria, run tests
+
+## Usage
+
+### Start a New Session
+
+Governance context is automatically injected via the SessionStart hook. You'll see the Three Loops model and fitness function reminders in every session.
+
+### Check Governance Compliance
+
+```
+/governance-check pre-commit    # Check staged changes
+/governance-check pre-pr        # Check branch for PR readiness
+/governance-check architecture  # Architecture review
+/governance-check all           # Run all checks
+```
+
+### Record a Decision
+
+```
+/create-adr "Use Redis for session caching"
+```
+
+Generates `docs/adr/ADR-NNN-use-redis-for-session-caching.md` with governance classification.
+
+### Start a Spec-Driven Feature
+
+```
+/spec-driven-dev
+```
+
+Guides you through creating a formal specification before implementation.
+
+### Set Up Governance in a New Project
+
+```
+/governance-setup
+```
+
+Creates `DOMAIN.md`, `docs/adr/`, and optionally installs rules.
+
+### Secret Scanner
+
+The PreToolUse hook automatically scans file writes for hardcoded secrets. If detected, the write is **blocked** with a remediation message. Patterns detected:
+
+- `API_KEY=`, `password=`, `PASSWORD=` with string values
+- `sk-` (OpenAI/Stripe), `ghp_`/`gho_`/`ghs_` (GitHub), `AKIA` (AWS)
+- `xox[bpsar]-` (Slack)
+
+## File Structure
+
+```
+claude-governance/
+├── .claude-plugin/
+│   ├── plugin.json              # Plugin manifest (v2.0.0)
+│   ├── marketplace.json         # Marketplace listing
+│   └── hooks/
+│       └── hooks.json           # Hook registrations
+├── hooks/
+│   ├── session-start.sh         # Inject governance context
+│   └── secret-scanner.sh        # Block hardcoded secrets
+├── commands/
+│   ├── governance-check.md      # /governance-check command
+│   └── create-adr.md            # /create-adr command
+├── skills/
+│   ├── spec-driven-dev/SKILL.md # /spec-driven-dev workflow
+│   └── governance-setup/SKILL.md # /governance-setup wizard
+├── agents/
+│   └── governance-reviewer.md   # Compliance review agent
+├── examples/
+│   ├── DOMAIN.md.example        # Domain model template
+│   ├── adr-template.md          # ADR template
+│   ├── project-claude-md.example # Example CLAUDE.md with governance
+│   └── rules/                   # Ready-to-use rules
+│       ├── governance.md        # Fitness functions
+│       ├── coding-style.md      # Code quality standards
+│       ├── git-workflow.md      # Commit and PR workflow
+│       ├── testing.md           # TDD and coverage requirements
+│       └── security.md          # Security guidelines
+├── scripts/
+│   └── install-rules.sh         # Rule installer with backup
+├── README.md
+└── LICENSE
 ```
 
 ## Diagrams
+
+### Governance Architecture
+
+```mermaid
+graph TB
+    subgraph "Always-On (Hooks)"
+        H1["SessionStart<br>Governance Context"]
+        H2["PreToolUse<br>Secret Scanner"]
+    end
+
+    subgraph "On-Demand (Commands & Skills)"
+        C1["/governance-check"]
+        C2["/create-adr"]
+        S1["/spec-driven-dev"]
+        S2["/governance-setup"]
+    end
+
+    subgraph "Review (Agent)"
+        A1["governance-reviewer"]
+    end
+
+    subgraph "Configuration (Rules)"
+        R1["~/.claude/rules/<br>Fitness Functions"]
+    end
+
+    H1 -->|"~300 tokens"| SESSION["Every Session"]
+    H2 -->|"blocks secrets"| WRITES["File Writes"]
+    C1 -->|"on demand"| CHECK["Compliance Report"]
+    A1 -->|"on demand"| CHECK
+    R1 -->|"always loaded"| SESSION
+```
 
 ### Three Loops Decision Flow
 
@@ -111,144 +242,32 @@ flowchart LR
     V -.- V3[Validate domain invariants]
 ```
 
-### Governance Architecture Overview
+## Token Budget
 
-```mermaid
-graph TB
-    subgraph "Developer Tools"
-        SPEC["/spec-driven-dev<br>Skill"]
-        ADR["ADR Templates"]
-        DOMAIN["DOMAIN.md<br>Domain Model"]
-    end
-
-    subgraph "Governance Layer"
-        RULES["Fitness Functions<br>(Rules)"]
-        LOOPS["Three Loops<br>Decision Model"]
-    end
-
-    subgraph "AI Execution"
-        PLAN["Plan Mode"]
-        IMPL["Implementation"]
-        REVIEW["Code Review"]
-    end
-
-    SPEC --> LOOPS
-    LOOPS --> PLAN
-    PLAN --> IMPL
-    IMPL --> RULES
-    RULES -->|Pass| REVIEW
-    RULES -->|Fail| IMPL
-    DOMAIN --> SPEC
-    DOMAIN --> RULES
-    ADR --> LOOPS
-```
-
-### Before vs After
-
-```mermaid
-graph LR
-    subgraph "Before: Ad-hoc AI Coding"
-        B1["Vague prompt"] --> B2["AI generates code"]
-        B2 --> B3["Hope it works"]
-        B3 --> B4["Fix issues reactively"]
-    end
-
-    subgraph "After: Governed AI Development"
-        A1["Write spec<br>with constraints"] --> A2["Classify autonomy<br>(Three Loops)"]
-        A2 --> A3["AI implements<br>within guardrails"]
-        A3 --> A4["Fitness functions<br>verify compliance"]
-    end
-```
-
-## Installation
-
-```bash
-claude plugin marketplace add pitimon/claude-governance
-```
-
-## Usage
-
-### Start a Spec-Driven Feature
-
-```
-You: /spec-driven-dev
-
-Claude: Starting spec-driven development workflow...
-        1. Understand — exploring codebase...
-        2. Specify — let's write a spec.md
-        ...
-```
-
-### Set Up Governance in Your Project
-
-1. **Copy the domain model template** to your project root:
-   ```bash
-   cp examples/DOMAIN.md.example ./DOMAIN.md
-   ```
-   Edit it to define your project's entities, invariants, and API contracts.
-
-2. **Add the governance rule** to your Claude Code rules:
-   ```bash
-   cp examples/governance-rule.md ~/.claude/rules/governance.md
-   ```
-   This adds fitness function checks to your development workflow.
-
-3. **Set up ADR tracking** in your project:
-   ```bash
-   mkdir -p docs/adr
-   cp examples/adr-template.md docs/adr/template.md
-   ```
-   Record architectural decisions with governance classification.
-
-### The Spec Template
-
-When you run `/spec-driven-dev`, it guides you through creating a spec with:
-
-- **Requirements** (MUST vs SHOULD) — prioritized, testable
-- **Domain Impact** — which entities change, new invariants
-- **Constraints** — anti-requirements (what NOT to do), patterns to follow
-- **Acceptance Criteria** — Given/When/Then format
-- **Verification Plan** — unit, integration, E2E test strategy
-
-## Companion Templates
-
-The `examples/` directory contains templates you can copy into any project:
-
-| Template | Purpose | Copy to |
-|----------|---------|---------|
-| `DOMAIN.md.example` | Domain model with entities, invariants, API contracts | `./DOMAIN.md` |
-| `governance-rule.md` | Fitness functions for pre-commit/pre-PR checks | `~/.claude/rules/governance.md` |
-| `adr-template.md` | Architecture Decision Record with governance loop | `./docs/adr/template.md` |
-
-## Before vs After
-
-| Aspect | Without Governance | With Governance |
-|--------|-------------------|-----------------|
-| **Requirements** | Verbal/chat-based, disappear | Formal spec.md, version-controlled |
-| **AI Autonomy** | Unclassified — AI decides everything | Three Loops — right level per task |
-| **Quality Checks** | Manual review only | Automated fitness functions |
-| **Decisions** | Untraceable | ADRs with rationale + governance loop |
-| **Domain Knowledge** | Implicit, lost between sessions | Explicit DOMAIN.md with invariants |
-| **Anti-requirements** | Not defined | Explicit constraints on what NOT to do |
-| **Verification** | Ad-hoc testing | Structured acceptance criteria |
+| Component | Tokens | When |
+|-----------|--------|------|
+| SessionStart hook | ~300 | Every session (always-on) |
+| Secret scanner | 0 | Runs as shell script, no token cost |
+| Rules (if installed) | ~500-800 | Every session (always-on) |
+| Commands, skills, agent | 0 | Only when invoked |
+| **Total always-on** | **~300** | Without rules |
+| **Total always-on** | **~1,100** | With rules installed |
 
 ## Research Basis
 
-This framework draws from industry research on the evolution of the developer role in the age of AI:
+This framework draws from industry research on the evolution of the developer role:
 
-1. **"The Software Developer's New Role"** — InfoQ (2024): Developers shifting from coders to system designers and AI orchestrators
-2. **"Building Evolutionary Architectures"** — O'Reilly (Ford, Parsons, Kua): Fitness functions as automated architecture governance
-3. **"How AI is Changing Software Development"** — GitHub Blog (2024): AI pair programming and the changing nature of code review
-4. **"The Future of Jobs Report"** — World Economic Forum (2024): AI augmentation requiring new governance skills
-5. **"Lightweight Architecture Decision Records"** — ThoughtWorks Technology Radar: ADRs for traceable architectural decisions
-6. **"Spec-Driven Development"** — Industry practice: Specification as single source of truth, derived from Design-by-Contract (Meyer, 1986)
+1. **"Building Evolutionary Architectures"** — O'Reilly (Ford, Parsons, Kua): Fitness functions as automated architecture governance
+2. **"The Software Developer's New Role"** — InfoQ (2024): Developers shifting from coders to system designers and AI orchestrators
+3. **"Lightweight Architecture Decision Records"** — ThoughtWorks Technology Radar: ADRs for traceable architectural decisions
+4. **"Spec-Driven Development"** — Industry practice derived from Design-by-Contract (Meyer, 1986)
 
 ## Contributing
 
 Contributions welcome! Areas where help is needed:
 
-- Additional skill templates (e.g., `/adr-create`, `/governance-check`)
-- More fitness function examples for different tech stacks
+- Additional fitness function examples for different tech stacks
+- Language-specific secret patterns for the scanner
 - Translations of documentation
 - Real-world case studies
 

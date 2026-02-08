@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-governance",
-  "description": "Governance skills for AI-assisted development — Architect of Governance framework",
+  "description": "Complete governance framework — fitness functions, secret scanning, spec-driven dev, ADR system, and Three Loops decision model for Claude Code",
   "owner": {
     "name": "pitimon",
     "email": "pitimon@users.noreply.github.com"
@@ -9,8 +9,8 @@
   "plugins": [
     {
       "name": "claude-governance",
-      "description": "Spec-driven development workflow, governance fitness functions, and ADR system for Claude Code",
-      "version": "1.0.0",
+      "description": "Governance framework with hooks (secret scanner, governance context), commands (/governance-check, /create-adr), skills (/spec-driven-dev, /governance-setup), and agent (governance-reviewer)",
+      "version": "2.0.0",
       "author": { "name": "pitimon" },
       "source": "./",
       "category": "development",

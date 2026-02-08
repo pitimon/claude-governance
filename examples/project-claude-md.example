@@ -1,0 +1,57 @@
+# CLAUDE.md - [Project Name]
+
+## Quick Reference
+
+```bash
+# Development
+npm run dev       # Start dev server
+npm test          # Run tests
+npm run lint      # Lint check
+```
+
+## Decision Autonomy (Three Loops Model)
+
+### Out-of-Loop (AI executes autonomously)
+- Code formatting, linting fixes
+- Import organization, unused variable removal
+- Simple bug fixes with clear root cause
+- Test additions for existing functions
+- Documentation typo fixes
+
+### On-the-Loop (AI proposes, human approves)
+- New feature implementation (use Plan Mode)
+- API endpoint changes (schema, routes, params)
+- Database schema changes
+- Dependency additions/upgrades
+- Configuration changes
+- Refactoring > 3 files
+
+### In-the-Loop (Human decides, AI assists)
+- Architecture decisions (new services, tech stack changes)
+- Security model changes (auth, permissions, API keys)
+- Deployment/infrastructure changes
+- Data migration or deletion
+- Public API breaking changes
+- Cost-impacting decisions
+
+## Development Protocol
+
+### Feature Workflow (Spec-Driven)
+1. `/spec-driven-dev` — Create spec for non-trivial features
+2. Review spec with stakeholder (human In-the-Loop)
+3. Plan Mode — generate implementation plan from spec
+4. Implement in iterations (On-the-Loop)
+5. `/governance-check` — Run fitness function checks
+6. Merge with conventional commit
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `DOMAIN.md` | Domain model, entities, invariants |
+| `docs/adr/` | Architecture Decision Records |
+
+## Documentation
+
+- [DOMAIN.md](./DOMAIN.md) - Domain model, invariants, API contracts
+- [docs/adr/](./docs/adr/) - Architecture Decision Records

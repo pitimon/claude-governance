@@ -1,11 +1,12 @@
 {
   "name": "claude-governance",
-  "version": "1.0.0",
-  "description": "Governance skills for Claude Code — spec-driven development, architecture decision records, and AI autonomy classification",
+  "version": "2.0.0",
+  "description": "Complete governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, ADR system, and Three Loops decision model",
   "author": {
     "name": "pitimon",
     "email": "pitimon@users.noreply.github.com"
   },
   "repository": "https://github.com/pitimon/claude-governance",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": ["governance", "fitness-functions", "security", "hooks", "spec-driven"]
 }
