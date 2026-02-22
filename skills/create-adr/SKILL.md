@@ -2,6 +2,7 @@
 name: create-adr
 description: Create an Architecture Decision Record (ADR) to document a technical decision with governance classification and fitness function.
 argument-hint: "<decision title>"
+user-invocable: true
 allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
 ---
 
@@ -31,6 +32,7 @@ Ask the user (using AskUserQuestion) for:
 
 **Question 3: Governance Loop**
 Options:
+
 - "Out-of-Loop — AI can implement autonomously (formatting, simple fixes)"
 - "On-the-Loop — AI proposes, human approves (features, API changes)"
 - "In-the-Loop — Human decides, AI assists (architecture, security, breaking changes)"
@@ -43,29 +45,37 @@ Write the ADR file to `docs/adr/ADR-NNN-<kebab-case-title>.md` using this templa
 # ADR-NNN: <Title>
 
 ## Status
+
 Accepted
 
 ## Date
+
 <today's date in YYYY-MM-DD>
 
 ## Context
+
 <user's context answer>
 
 ## Decision
+
 <user's decision answer>
 
 ## Consequences
 
 ### Positive
+
 - <infer 2-3 positive consequences from the decision>
 
 ### Negative
+
 - <infer 1-2 trade-offs or downsides>
 
 ### Risks
+
 - <infer 1-2 risks>
 
 ## Governance
+
 - **Decision Loop**: <selected loop>
 - **Fitness Function**: <suggest an automated check to verify this decision is upheld>
 - **Review Trigger**: <when should this decision be revisited>

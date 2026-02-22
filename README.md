@@ -1,5 +1,7 @@
 # claude-governance
 
+[![Validate Plugin](https://github.com/pitimon/claude-governance/actions/workflows/validate.yml/badge.svg)](https://github.com/pitimon/claude-governance/actions/workflows/validate.yml)
+
 **Governance framework for Claude Code** — fitness functions, secret scanning, spec-driven development, and architectural decision records.
 
 > Stop writing code. Start governing AI that writes code for you.
@@ -27,34 +29,34 @@ Start a new session — governance context loads automatically.
 
 ### Always-On (Hooks)
 
-| Hook | Event | What It Does |
-|------|-------|--------------|
-| Governance context | `SessionStart` | Injects Three Loops model + fitness functions (~300 tokens) |
-| Secret scanner | `PreToolUse` | Blocks `Edit`/`Write` containing hardcoded secrets (exit 2 = block) |
+| Hook               | Event          | What It Does                                                        |
+| ------------------ | -------------- | ------------------------------------------------------------------- |
+| Governance context | `SessionStart` | Injects Three Loops model + fitness functions (~300 tokens)         |
+| Secret scanner     | `PreToolUse`   | Blocks `Edit`/`Write` containing hardcoded secrets (exit 2 = block) |
 
 **Detected secret patterns:** `sk-*`, `ghp_*`, `gho_*`, `ghs_*`, `AKIA*`, `xox[bpsar]-*`, `API_KEY=`, `password=`
 
-### On-Demand (Commands, Skills, Agent)
+### On-Demand (Skills & Agent)
 
-| Component | Usage | Purpose |
-|-----------|-------|---------|
-| `/governance-check` | `/governance-check pre-commit` | Run fitness functions against staged changes |
-| `/create-adr` | `/create-adr "Title"` | Generate Architecture Decision Record |
-| `/spec-driven-dev` | `/spec-driven-dev` | Spec-first development: define WHAT, AI implements HOW |
-| `/governance-setup` | `/governance-setup` | Initialize governance in any project |
-| `governance-reviewer` | Auto-triggered | Agent for compliance review of code changes |
+| Component             | Usage                          | Purpose                                                |
+| --------------------- | ------------------------------ | ------------------------------------------------------ |
+| `/governance-check`   | `/governance-check pre-commit` | Run fitness functions against staged changes           |
+| `/create-adr`         | `/create-adr "Title"`          | Generate Architecture Decision Record                  |
+| `/spec-driven-dev`    | `/spec-driven-dev`             | Spec-first development: define WHAT, AI implements HOW |
+| `/governance-setup`   | `/governance-setup`            | Initialize governance in any project                   |
+| `governance-reviewer` | Auto-triggered                 | Agent for compliance review of code changes            |
 
 ### Rules (Optional)
 
 5 ready-to-use rules for `~/.claude/rules/`:
 
-| Rule | Focus |
-|------|-------|
-| `governance.md` | Fitness functions at every stage |
+| Rule              | Focus                                   |
+| ----------------- | --------------------------------------- |
+| `governance.md`   | Fitness functions at every stage        |
 | `coding-style.md` | Immutability, file size, error handling |
-| `git-workflow.md` | Conventional commits, PR workflow |
-| `testing.md` | TDD, 80% coverage minimum |
-| `security.md` | No secrets, input validation, OWASP |
+| `git-workflow.md` | Conventional commits, PR workflow       |
+| `testing.md`      | TDD, 80% coverage minimum               |
+| `security.md`     | No secrets, input validation, OWASP     |
 
 ```bash
 # Install all rules (backs up existing files)
@@ -142,12 +144,12 @@ graph TB
 
 ## Token Budget
 
-| Component | Tokens | When |
-|-----------|--------|------|
-| SessionStart hook | ~300 | Every session |
-| Secret scanner | 0 | Shell script, no token cost |
-| Rules (if installed) | ~500-800 | Every session |
-| Commands / skills / agent | 0 | Only when invoked |
+| Component                 | Tokens   | When                        |
+| ------------------------- | -------- | --------------------------- |
+| SessionStart hook         | ~300     | Every session               |
+| Secret scanner            | 0        | Shell script, no token cost |
+| Rules (if installed)      | ~500-800 | Every session               |
+| Commands / skills / agent | 0        | Only when invoked           |
 
 **Total always-on cost:** ~300 tokens (without rules) / ~1,100 tokens (with rules)
 
@@ -158,20 +160,19 @@ graph TB
 ```
 claude-governance/
 ├── .claude-plugin/
-│   ├── plugin.json
-│   └── marketplace.json
+│   ├── plugin.json              # Plugin metadata + skills path + keywords
+│   └── marketplace.json         # Marketplace listing schema
 ├── hooks/
-│   ├── hooks.json               # Hook registrations
+│   ├── hooks.json               # Hook registrations (SessionStart, PreToolUse)
 │   ├── session-start.sh         # Governance context injection
 │   └── secret-scanner.sh        # Secret pattern blocker
-├── commands/
-│   ├── governance-check.md
-│   └── create-adr.md
 ├── skills/
-│   ├── spec-driven-dev/SKILL.md
-│   └── governance-setup/SKILL.md
+│   ├── spec-driven-dev/SKILL.md # Spec-first development workflow
+│   ├── governance-check/SKILL.md# Fitness function runner
+│   ├── create-adr/SKILL.md     # ADR generator
+│   └── governance-setup/SKILL.md# Project initialization wizard
 ├── agents/
-│   └── governance-reviewer.md
+│   └── governance-reviewer.md   # Compliance review agent
 ├── examples/
 │   ├── rules/                   # 5 rules for ~/.claude/rules/
 │   ├── DOMAIN.md.example
@@ -179,6 +180,11 @@ claude-governance/
 │   └── project-claude-md.example
 ├── scripts/
 │   └── install-rules.sh
+├── tests/
+│   └── validate-plugin.sh      # Structural integrity validation
+├── .github/workflows/
+│   └── validate.yml             # CI/CD pipeline
+├── CHANGELOG.md
 ├── README.md
 └── LICENSE
 ```
@@ -190,6 +196,16 @@ claude-governance/
 - **Fitness Functions** — "Building Evolutionary Architectures" (Ford, Parsons, Kua, O'Reilly)
 - **ADRs** — "Lightweight Architecture Decision Records" (ThoughtWorks Technology Radar)
 - **Spec-Driven Dev** — Derived from Design-by-Contract (Meyer, 1986)
+
+## Development
+
+```bash
+# Run structural validation
+bash tests/validate-plugin.sh --skip-install-check
+
+# Run with install verification (requires plugin installed locally)
+bash tests/validate-plugin.sh
+```
 
 ## Contributing
 

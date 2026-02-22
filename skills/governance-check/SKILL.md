@@ -2,6 +2,7 @@
 name: governance-check
 description: Run governance fitness function checks against staged changes or the full project. Validates code quality, security, and architecture standards.
 argument-hint: "[pre-commit|pre-pr|architecture|all]"
+user-invocable: true
 allowed-tools: ["Read", "Glob", "Grep", "Bash"]
 ---
 
@@ -12,6 +13,7 @@ Run the requested governance check category. Default to `all` if no argument pro
 ## Check Categories
 
 ### pre-commit
+
 Scan staged/changed files for:
 
 1. **Hardcoded secrets** — Search for patterns: `API_KEY=`, `password=`, `sk-`, `ghp_`, `AKIA`, hardcoded token strings. Use `git diff --cached` or `git diff` to get changed content.
@@ -23,6 +25,7 @@ Scan staged/changed files for:
 7. **Console.log** — No `console.log` in production code (allow in test files).
 
 ### pre-pr
+
 Check the full branch diff against base:
 
 1. **Conventional commits** — All commits on this branch must follow format: `type: description` where type is one of: feat, fix, refactor, docs, test, chore, perf, ci. Use `git log --oneline`.
@@ -32,6 +35,7 @@ Check the full branch diff against base:
 5. **TODO context** — All TODO comments must include context about what needs to be done and why.
 
 ### architecture
+
 Periodic architecture review:
 
 1. **Service boundaries** — No direct cross-service database access. Services communicate through APIs.

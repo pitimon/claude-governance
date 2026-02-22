@@ -5,6 +5,8 @@ description: >
   Use when: setting up a new project with governance, adding governance to an existing project,
   or when the user asks to "set up governance", "initialize governance", or "add governance".
   Creates DOMAIN.md, docs/adr/, and optionally installs rules to ~/.claude/rules/.
+user-invocable: true
+allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
 ---
 
 # Governance Setup
@@ -14,6 +16,7 @@ Initialize the governance framework in the current project. Guide the user throu
 ## Prerequisites
 
 Check if governance artifacts already exist:
+
 - `DOMAIN.md` in project root
 - `docs/adr/` directory
 - `~/.claude/rules/governance.md`
@@ -28,6 +31,7 @@ If `DOMAIN.md` doesn't exist, ask the user:
 "What is this project about? Briefly describe the main entities/domain objects."
 
 Then generate a `DOMAIN.md` using the template from the plugin's `examples/DOMAIN.md.example`, customized with the user's entities. Include:
+
 - Core entities with fields, types, constraints
 - Invariants for each entity
 - API contract rules (if applicable)
@@ -48,11 +52,13 @@ Create `docs/adr/ADR-001-adopt-governance-framework.md` as the first ADR documen
 Ask the user: "Would you like to install governance rules to `~/.claude/rules/`? This enables fitness function checks across all your projects."
 
 Options:
+
 - "Yes — install all 5 rules (governance, coding-style, git-workflow, testing, security)"
 - "Just governance rule"
 - "Skip — I'll manage rules myself"
 
 If they choose to install, copy from the plugin's `examples/rules/` directory:
+
 ```bash
 cp ${CLAUDE_PLUGIN_ROOT}/examples/rules/*.md ~/.claude/rules/
 ```
@@ -65,16 +71,19 @@ Ask if they want to add a governance section to their project's `CLAUDE.md`. If 
 ## Decision Autonomy (Three Loops Model)
 
 ### Out-of-Loop (AI executes autonomously)
+
 - Code formatting, linting fixes
 - Import organization, unused variable removal
 - Simple bug fixes with clear root cause
 
 ### On-the-Loop (AI proposes, human approves)
+
 - New feature implementation (use Plan Mode)
 - API endpoint changes
 - Refactoring > 3 files
 
 ### In-the-Loop (Human decides, AI assists)
+
 - Architecture decisions
 - Security model changes
 - Breaking changes
@@ -83,6 +92,7 @@ Ask if they want to add a governance section to their project's `CLAUDE.md`. If 
 ### 5. Summary
 
 Print a summary of what was created:
+
 ```
 Governance initialized:
 - DOMAIN.md — domain model (edit to match your entities)

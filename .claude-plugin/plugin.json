@@ -1,6 +1,6 @@
 {
   "name": "claude-governance",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Complete governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, ADR system, and Three Loops decision model",
   "author": {
     "name": "pitimon",
@@ -8,5 +8,20 @@
   },
   "repository": "https://github.com/pitimon/claude-governance",
   "license": "MIT",
-  "keywords": ["governance", "fitness-functions", "security", "hooks", "spec-driven"]
+  "skills": "./skills/",
+  "keywords": [
+    "governance",
+    "fitness-functions",
+    "security",
+    "hooks",
+    "spec-driven",
+    "adr",
+    "architecture-decision-records",
+    "three-loops",
+    "ai-autonomy",
+    "code-quality",
+    "pre-commit-checks",
+    "domain-model",
+    "guardrails"
+  ]
 }
