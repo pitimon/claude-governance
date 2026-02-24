@@ -18,9 +18,9 @@ SKIP_INSTALL=false
 
 # --- Helpers ---
 
-pass() { ((PASS++)); printf "  \033[32mPASS\033[0m %s\n" "$1"; }
-fail() { ((FAIL++)); printf "  \033[31mFAIL\033[0m %s\n" "$1"; }
-skip() { ((SKIP++)); printf "  \033[33mSKIP\033[0m %s\n" "$1"; }
+pass() { (( ++PASS )); printf "  \033[32mPASS\033[0m %s\n" "$1"; }
+fail() { (( ++FAIL )); printf "  \033[31mFAIL\033[0m %s\n" "$1"; }
+skip() { (( ++SKIP )); printf "  \033[33mSKIP\033[0m %s\n" "$1"; }
 section() { printf "\n\033[1;36m[%s]\033[0m\n" "$1"; }
 
 json_field() {
