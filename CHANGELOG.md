@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-02-24
+
+### Fixed
+
+- `validate-plugin.sh`: replace post-increment `((PASS++))` with pre-increment `(( ++PASS ))` to prevent `set -euo pipefail` exit on bash 5.x (Ubuntu CI)
+
 ## [2.1.0] - 2026-02-22
 
 ### Added

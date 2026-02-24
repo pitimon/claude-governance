@@ -10,7 +10,7 @@
     {
       "name": "claude-governance",
       "description": "Governance framework with hooks (secret scanner, governance context), skills (/governance-check, /create-adr, /spec-driven-dev, /governance-setup), and agent (governance-reviewer)",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "author": { "name": "pitimon" },
       "source": "./",
       "category": "development",
