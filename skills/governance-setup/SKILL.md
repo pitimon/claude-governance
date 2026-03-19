@@ -13,6 +13,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
 
 Initialize the governance framework in the current project. Guide the user through each step with confirmations.
 
+## Scope and When to Use
+
+Use `/governance-setup` when setting up a new project or adding governance to an existing one. This is a one-time initialization — it creates DOMAIN.md, the ADR directory, and optionally installs rules.
+
+Not needed if the project already has DOMAIN.md and docs/adr/. For ongoing checks, use `/governance-check` or the `governance-reviewer` agent.
+
 ## Prerequisites
 
 Check if governance artifacts already exist:

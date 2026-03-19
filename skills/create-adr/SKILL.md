@@ -10,6 +10,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
 
 Generate an ADR for the given decision title.
 
+## Scope and When to Use
+
+Use `/create-adr` to document significant technical decisions — architecture choices, technology selections, API design patterns, or governance policy changes. ADRs create an audit trail so future developers understand WHY decisions were made.
+
+Not needed for trivial implementation choices. If unsure whether a decision warrants an ADR, ask: "Would a new team member need to know why we chose this?"
+
 ## Workflow
 
 ### 1. Determine ADR Number

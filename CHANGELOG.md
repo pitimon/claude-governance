@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-03-19
+
+### Added
+
+- Scope and When to Use sections in `create-adr`, `governance-setup`, and `spec-driven-dev` skills
+
+### Fixed
+
+- `sk-`, `sk-proj-`, `sk-ant-` regex patterns now include hyphens (`[A-Za-z0-9_-]`) to match real API keys (#6)
+
 ## [2.2.0] - 2026-03-19
 
 ### Added

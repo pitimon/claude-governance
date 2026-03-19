@@ -14,6 +14,12 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "AskUserQuestion"]
 
 Developer = spec author (defines WHAT + constraints). AI = code generator (implements HOW within guardrails).
 
+## Scope and When to Use
+
+Use `/spec-driven-dev` when starting any feature larger than a trivial fix — especially multi-file changes, new modules, or features with unclear requirements. The spec becomes the contract between human intent and AI implementation.
+
+Skip this for trivial fixes (Out-of-Loop tasks): formatting, lint fixes, import cleanup, single-line bug fixes.
+
 ## Decision Loop Classification
 
 Before starting, classify the feature using Three Loops:
