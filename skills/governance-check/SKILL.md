@@ -10,19 +10,55 @@ allowed-tools: ["Read", "Glob", "Grep", "Bash"]
 
 Run the requested governance check category. Default to `all` if no argument provided.
 
+## Scope and When to Use
+
+**This is a QUICK checklist tool** — single-category, fast pass/fail, actionable remediation. Use for:
+
+- Pre-commit spot checks on staged changes
+- Quick validation before pushing
+- Verifying a specific category (secrets, file size, etc.)
+
+For deep multi-file review with severity grading and domain invariant analysis, use the `governance-reviewer` agent instead.
+
+## Project Type Detection
+
+Before running checks, detect the project's primary language:
+
+| Indicator                                        | Language |
+| ------------------------------------------------ | -------- |
+| `package.json`                                   | JS/TS    |
+| `pyproject.toml`, `requirements.txt`, `setup.py` | Python   |
+| `go.mod`                                         | Go       |
+| `Cargo.toml`                                     | Rust     |
+
+If multiple indicators exist, check all relevant languages. If none match, apply generic checks.
+
 ## Check Categories
 
 ### pre-commit
 
 Scan staged/changed files for:
 
-1. **Hardcoded secrets** — Search for patterns: `API_KEY=`, `password=`, `sk-`, `ghp_`, `AKIA`, hardcoded token strings. Use `git diff --cached` or `git diff` to get changed content.
-2. **Input validation** — New API endpoints/route handlers MUST have input validation (Zod schema, joi, express-validator, or equivalent). Check new route files.
+1. **Hardcoded secrets** — Search for patterns: `API_KEY=`, `password=`, `sk-`, `sk-ant-`, `ghp_`, `AKIA`, hardcoded token strings, `-----BEGIN PRIVATE KEY-----`, JWT tokens (`eyJ...`), Google API keys (`AIza...`), Azure connection strings, MongoDB URIs. Use `git diff --cached` or `git diff` to get changed content.
+2. **Input validation** — New API endpoints/route handlers MUST have input validation. Check for language-appropriate validation:
+   - JS/TS: Zod, joi, yup, express-validator
+   - Python: pydantic, marshmallow, cerberus
+   - Go: go-validator, custom validation functions
+   - Rust: serde with validation, validator crate
 3. **Parameterized queries** — Database queries must use parameterized queries, not string interpolation. Search for SQL string concatenation patterns.
 4. **File size** — No file should exceed 800 lines. Use `wc -l` on changed files.
 5. **Function length** — No function should exceed 50 lines. Use Grep to find function definitions and count lines.
 6. **Immutability** — Check for direct mutation patterns (`.push(`, `obj.prop =` on shared state, `delete obj.prop`).
-7. **Console.log** — No `console.log` in production code (allow in test files).
+7. **Debug prints** — No debug prints in production code (allow in test files):
+   - JS/TS: `console.log`
+   - Python: `print(` (excluding logging)
+   - Go: `fmt.Println` (excluding structured logging)
+   - Rust: `println!`
+8. **Dangerous functions** — Flag usage of:
+   - JS/TS: `eval()`, `innerHTML`
+   - Python: `eval()`, `exec()`, `pickle.loads()`
+   - Go: `unsafe.Pointer`
+   - Rust: `unsafe` blocks
 
 ### pre-pr
 

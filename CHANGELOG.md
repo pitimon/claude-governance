@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-03-19
+
+### Added
+
+- 9 new secret patterns: `sk-ant-*` (Anthropic), private key blocks, JWT tokens, Google API keys, Azure connection strings, MongoDB URIs, `token=`, `GITHUB_TOKEN=`, `GH_TOKEN=` (closes #1, #3)
+- Python3 availability check in secret scanner — warns instead of silently failing (closes #2)
+- `scripts/bump-version.sh` — single-command version bump across plugin.json, marketplace.json, CHANGELOG.md
+- `docs/adr/ADR-001-adopt-governance-framework.md` — documents why and how the governance framework was adopted
+- Language-agnostic governance checks: project type detection (JS/TS, Python, Go, Rust) with language-appropriate validation, debug print, and dangerous function patterns
+- Scope and When to Use sections in both `/governance-check` (quick checklist) and `governance-reviewer` agent (deep review) with cross-references
+- Scanner limitations documentation in README with complementary tool recommendations (closes #5)
+- `.gitignore` patterns for `.p12`, `.pfx`, `credentials.json`, `service-account*.json`, IDE dirs, `!.env.example` exception (closes #4)
+- Validation check for `scripts/bump-version.sh` existence in `validate-plugin.sh`
+
+### Changed
+
+- Secret scanner error message now shows multi-language env var examples (JS, Python, Go)
+- Session-start hook updated with expanded secret patterns and language-neutral terminology
+- `governance.md` rules template expanded with multi-language validation and debug print patterns
+- `governance-reviewer` agent now detects project language and applies language-specific checks
+
+### Fixed
+
+- `grep` crash on private key pattern (`-----BEGIN`) by using `--` argument separator
+
 ## [2.1.1] - 2026-02-24
 
 ### Fixed

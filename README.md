@@ -34,7 +34,22 @@ Start a new session — governance context loads automatically.
 | Governance context | `SessionStart` | Injects Three Loops model + fitness functions (~300 tokens)         |
 | Secret scanner     | `PreToolUse`   | Blocks `Edit`/`Write` containing hardcoded secrets (exit 2 = block) |
 
-**Detected secret patterns:** `sk-*`, `ghp_*`, `gho_*`, `ghs_*`, `AKIA*`, `xox[bpsar]-*`, `API_KEY=`, `password=`
+**Detected secret patterns:** `sk-*`, `sk-ant-*`, `ghp_*`, `gho_*`, `ghs_*`, `AKIA*`, `xox[bpsar]-*`, `API_KEY=`, `password=`, `token=`, `-----BEGIN PRIVATE KEY-----`, JWT (`eyJ...`), Google API key (`AIza...`), Azure connection string, MongoDB URI, `GITHUB_TOKEN=`, `GH_TOKEN=`
+
+#### Limitations
+
+The secret scanner is a **first line of defense**, not comprehensive protection:
+
+- **Multi-line secrets**: Patterns are matched line-by-line; secrets split across multiple lines may not be detected
+- **Encoded secrets**: Base64-encoded, hex-encoded, or otherwise obfuscated secrets are not detected
+- **Variable indirection**: Secrets assigned through variable chains (`x = secret; y = x`) are not tracked
+- **Binary files**: Only text content passed through `Edit`/`Write`/`MultiEdit` is scanned
+
+For comprehensive secret detection, use complementary tools:
+
+- [GitLeaks](https://github.com/gitleaks/gitleaks) — Git history scanning with entropy detection
+- [TruffleHog](https://github.com/trufflesecurity/trufflehog) — High-signal secret detection with verification
+- `/secret-scan` from [devsecops-ai-team](https://github.com/piti-piti/devsecops-ai-team) — Claude Code plugin with GitLeaks + TruffleHog integration
 
 ### On-Demand (Skills & Agent)
 
@@ -179,7 +194,11 @@ claude-governance/
 │   ├── adr-template.md
 │   └── project-claude-md.example
 ├── scripts/
-│   └── install-rules.sh
+│   ├── install-rules.sh
+│   └── bump-version.sh         # Version bump across plugin.json, marketplace.json, CHANGELOG
+├── docs/
+│   └── adr/
+│       └── ADR-001-adopt-governance-framework.md
 ├── tests/
 │   └── validate-plugin.sh      # Structural integrity validation
 ├── .github/workflows/

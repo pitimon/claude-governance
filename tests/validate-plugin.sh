@@ -199,6 +199,19 @@ else
   fail "agents/governance-reviewer.md not found"
 fi
 
+# 3.7 Version bump script
+bump_script="$REPO_ROOT/scripts/bump-version.sh"
+if [[ -f "$bump_script" ]]; then
+  pass "scripts/bump-version.sh exists"
+  if [[ -x "$bump_script" ]]; then
+    pass "scripts/bump-version.sh is executable"
+  else
+    fail "scripts/bump-version.sh exists but is not executable"
+  fi
+else
+  fail "scripts/bump-version.sh not found"
+fi
+
 # 3.6 No duplicate hooks.json in .claude-plugin/
 if [[ -f "$PLUGIN_DIR/hooks/hooks.json" ]]; then
   fail ".claude-plugin/hooks/hooks.json exists (should only be in hooks/)"

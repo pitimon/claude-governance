@@ -4,6 +4,12 @@
 # Runs as PreToolUse hook on Edit|Write|MultiEdit
 # Exit 0 = allow, Exit 2 = block
 
+# Require python3 for JSON parsing
+if ! command -v python3 &>/dev/null; then
+  echo "Governance: WARNING — python3 not found, secret scanning disabled" >&2
+  exit 0
+fi
+
 # Read tool input from stdin
 INPUT=$(cat)
 
@@ -45,22 +51,33 @@ PATTERNS=(
   'PASSWORD\s*=\s*["\x27][^\x27"]{4,}["\x27]:Hardcoded password'
   'sk-[A-Za-z0-9]{20,}:OpenAI/Stripe secret key'
   'sk-proj-[A-Za-z0-9]{20,}:OpenAI project key'
+  'sk-ant-[A-Za-z0-9]{20,}:Anthropic API key'
   'ghp_[A-Za-z0-9]{36,}:GitHub personal access token'
   'gho_[A-Za-z0-9]{36,}:GitHub OAuth token'
   'ghs_[A-Za-z0-9]{36,}:GitHub server token'
   'AKIA[A-Z0-9]{16}:AWS access key ID'
   'xox[bpsar]-[A-Za-z0-9\-]{10,}:Slack token'
+  '-----BEGIN[A-Z ]*PRIVATE KEY-----:Private key block'
+  'eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}:JWT token'
+  'AIza[0-9A-Za-z_-]{35}:Google API key'
+  'DefaultEndpointsProtocol=https;AccountName=:Azure connection string'
+  'mongodb(\+srv)?://[^\s]+:MongoDB connection string'
+  '[Tt]oken\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded token'
+  'GITHUB_TOKEN\s*=\s*["\x27][^\x27"]{4,}["\x27]:GitHub token assignment'
+  'GH_TOKEN\s*=\s*["\x27][^\x27"]{4,}["\x27]:GitHub token assignment'
 )
 
 for ENTRY in "${PATTERNS[@]}"; do
   PATTERN="${ENTRY%%:*}"
   DESC="${ENTRY##*:}"
 
-  if echo "$CONTENT" | grep -qE "$PATTERN"; then
+  if echo "$CONTENT" | grep -qE -- "$PATTERN"; then
     echo "Governance: Blocked — $DESC detected in file content." >&2
     echo "" >&2
     echo "Use environment variables instead of hardcoding secrets:" >&2
-    echo "  const value = process.env.YOUR_SECRET" >&2
+    echo "  JS/TS:  const value = process.env.YOUR_SECRET" >&2
+    echo "  Python: value = os.environ['YOUR_SECRET']" >&2
+    echo "  Go:     value := os.Getenv(\"YOUR_SECRET\")" >&2
     echo "" >&2
     echo "To fix: replace the hardcoded value with an environment variable reference." >&2
     exit 2
