@@ -2,7 +2,7 @@
 
 # Secret scanner hook — blocks file writes containing hardcoded secrets
 # Runs as PreToolUse hook on Edit|Write|MultiEdit
-# Exit 0 = allow, Exit 2 = block
+# Exit 0 = allow (or warn for PII), Exit 2 = block (secrets/credentials)
 
 # Require python3 for JSON parsing
 if ! command -v python3 &>/dev/null; then
@@ -42,9 +42,8 @@ if [ -z "$CONTENT" ]; then
   exit 0
 fi
 
-# Scan for secret patterns
-# Each pattern: regex + description
-PATTERNS=(
+# === BLOCK PATTERNS (exit 2) — secrets and credentials ===
+BLOCK_PATTERNS=(
   'API_KEY\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded API key'
   'api_key\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded API key'
   'password\s*=\s*["\x27][^\x27"]{4,}["\x27]:Hardcoded password'
@@ -58,16 +57,21 @@ PATTERNS=(
   'AKIA[A-Z0-9]{16}:AWS access key ID'
   'xox[bpsar]-[A-Za-z0-9\-]{10,}:Slack token'
   '-----BEGIN[A-Z ]*PRIVATE KEY-----:Private key block'
-  'eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}:JWT token'
+  'eyJ[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{15,}:JWT token'
   'AIza[0-9A-Za-z_-]{35}:Google API key'
   'DefaultEndpointsProtocol=https;AccountName=:Azure connection string'
   'mongodb(\+srv)?://[^\s]+:MongoDB connection string'
   '[Tt]oken\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded token'
   'GITHUB_TOKEN\s*=\s*["\x27][^\x27"]{4,}["\x27]:GitHub token assignment'
   'GH_TOKEN\s*=\s*["\x27][^\x27"]{4,}["\x27]:GitHub token assignment'
+  'Bearer\s+[A-Za-z0-9_\-\.]{20,}:Bearer token in code'
+  'Authorization:\s*Bearer\s+[A-Za-z0-9_\-\.]{20,}:Hardcoded Authorization header'
+  'oauth_token\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded OAuth token'
+  'refresh_token\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded refresh token'
+  'client_secret\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded client secret'
 )
 
-for ENTRY in "${PATTERNS[@]}"; do
+for ENTRY in "${BLOCK_PATTERNS[@]}"; do
   PATTERN="${ENTRY%%:*}"
   DESC="${ENTRY##*:}"
 
@@ -83,5 +87,30 @@ for ENTRY in "${PATTERNS[@]}"; do
     exit 2
   fi
 done
+
+# === WARN PATTERNS (exit 0 + stderr) — PII detection [DSGAI01] ===
+WARN_PATTERNS=(
+  '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}:Possible email address (PII)'
+  '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b:Possible SSN (PII)'
+  '\b[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}\b:Possible credit card number (PII)'
+)
+
+PII_WARNED=false
+
+for ENTRY in "${WARN_PATTERNS[@]}"; do
+  PATTERN="${ENTRY%%:*}"
+  DESC="${ENTRY##*:}"
+
+  if echo "$CONTENT" | grep -qE -- "$PATTERN"; then
+    echo "Governance: WARNING — $DESC. Review before committing." >&2
+    PII_WARNED=true
+  fi
+done
+
+if [ "$PII_WARNED" = true ]; then
+  echo "" >&2
+  echo "PII detected. Ensure data handling complies with your data classification policy." >&2
+  echo "See: examples/DATA-CLASSIFICATION.md.example for guidance. [DSGAI01]" >&2
+fi
 
 exit 0

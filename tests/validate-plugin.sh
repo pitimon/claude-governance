@@ -212,6 +212,19 @@ else
   fail "scripts/bump-version.sh not found"
 fi
 
+# 3.8 Secret scanner test suite
+test_suite="$REPO_ROOT/tests/test-secret-scanner.sh"
+if [[ -f "$test_suite" ]]; then
+  pass "tests/test-secret-scanner.sh exists"
+  if [[ -x "$test_suite" ]]; then
+    pass "tests/test-secret-scanner.sh is executable"
+  else
+    fail "tests/test-secret-scanner.sh exists but is not executable"
+  fi
+else
+  fail "tests/test-secret-scanner.sh not found"
+fi
+
 # 3.6 No duplicate hooks.json in .claude-plugin/
 if [[ -f "$PLUGIN_DIR/hooks/hooks.json" ]]; then
   fail ".claude-plugin/hooks/hooks.json exists (should only be in hooks/)"

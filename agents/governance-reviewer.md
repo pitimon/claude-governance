@@ -71,6 +71,8 @@ For each changed file:
 
 **Input validation**: For new API route handlers, check that request body/params are validated before use. Look for language-appropriate validation libraries.
 
+**Agent credentials** [DSGAI02]: Search for OAuth/bearer patterns — `Bearer `, `oauth_token`, `refresh_token`, `client_secret`, `Authorization:`. Flag hardcoded credentials in agent configs, skill files, and MCP settings.
+
 ### 4. Domain Invariant Check
 
 If `DOMAIN.md` exists:
@@ -84,6 +86,9 @@ If `DOMAIN.md` exists:
 - Error responses don't contain stack traces or internal paths
 - No direct database imports in route handler files (should go through service layer)
 - Authentication middleware present on non-health endpoints
+- Plugin/MCP security: Check `.mcp.json` and `.claude/settings.json` for overly broad permissions. Verify MCP servers use least-privilege tool access. [DSGAI06]
+- Context minimization: Verify session-start hooks, CLAUDE.md, and rules files do not embed secrets, PII, or excessive sensitive context. [DSGAI15]
+- Agent credential hygiene: Verify agent and skill config files contain no embedded credentials. [DSGAI02]
 
 ### 6. Output
 
@@ -107,5 +112,7 @@ Present findings with severity levels:
 ### Summary
 Files reviewed: X | Critical: N | High: N | Medium: N | Low: N
 ```
+
+Include DSGAI control references where applicable (e.g., `[DSGAI02]`, `[DSGAI06]`, `[DSGAI15]`).
 
 Be specific: include file paths, line numbers, and what to fix. Don't flag false positives — if a pattern is clearly safe (e.g., a test file, a comment, an example), skip it.

@@ -55,19 +55,20 @@ Start a new session — governance context loads automatically (~300 tokens).
 | **Governance context** | `SessionStart` | Injects Three Loops model + fitness functions (~300 tokens)    |
 | **Secret scanner**     | `PreToolUse`   | Blocks `Edit`/`Write`/`MultiEdit` containing hardcoded secrets |
 
-### Secret Scanner — 20 Patterns
+### Secret Scanner — 25+ Patterns
 
-The scanner detects secrets in real-time before they reach the filesystem:
+The scanner detects secrets and PII in real-time before they reach the filesystem:
 
-| Category        | Patterns                                                                     |
-| --------------- | ---------------------------------------------------------------------------- |
-| AI/ML keys      | `sk-*` (OpenAI/Stripe), `sk-ant-*` (Anthropic), `sk-proj-*` (OpenAI project) |
-| Cloud providers | `AKIA*` (AWS), `AIza*` (Google), Azure connection strings                    |
-| Git platforms   | `ghp_*`, `gho_*`, `ghs_*` (GitHub), `GITHUB_TOKEN=`, `GH_TOKEN=`             |
-| Communication   | `xox[bpsar]-*` (Slack)                                                       |
-| Credentials     | `API_KEY=`, `password=`, `token=`                                            |
-| Crypto/Auth     | `-----BEGIN PRIVATE KEY-----`, JWT (`eyJ...`)                                |
-| Databases       | MongoDB connection strings                                                   |
+| Category        | Patterns                                                                                        | Behavior |
+| --------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| AI/ML keys      | `sk-*` (OpenAI/Stripe), `sk-ant-*` (Anthropic), `sk-proj-*` (OpenAI project)                    | BLOCK    |
+| Cloud providers | `AKIA*` (AWS), `AIza*` (Google), Azure connection strings                                       | BLOCK    |
+| Git platforms   | `ghp_*`, `gho_*`, `ghs_*` (GitHub), `GITHUB_TOKEN=`, `GH_TOKEN=`                                | BLOCK    |
+| Communication   | `xox[bpsar]-*` (Slack)                                                                          | BLOCK    |
+| Credentials     | `API_KEY=`, `password=`, `token=`, `Bearer`, `oauth_token=`, `refresh_token=`, `client_secret=` | BLOCK    |
+| Crypto/Auth     | `-----BEGIN PRIVATE KEY-----`, JWT (`eyJ...`)                                                   | BLOCK    |
+| Databases       | MongoDB connection strings                                                                      | BLOCK    |
+| PII detection   | Email addresses, SSN (XXX-XX-XXXX), credit card numbers [DSGAI01]                               | WARN     |
 
 > **Limitations:** The scanner is a first line of defense. It does not detect multi-line secrets, base64-encoded values, or variable indirection. For comprehensive scanning, use [GitLeaks](https://github.com/gitleaks/gitleaks), [TruffleHog](https://github.com/trufflesecurity/trufflehog), or the `/secret-scan` skill from [devsecops-ai-team](https://github.com/pitimon/devsecops-ai-team).
 
@@ -201,7 +202,7 @@ claude-governance/
 ├── hooks/
 │   ├── hooks.json               # Hook registrations (SessionStart, PreToolUse)
 │   ├── session-start.sh         # Governance context injection
-│   └── secret-scanner.sh        # Secret pattern blocker (20 patterns)
+│   └── secret-scanner.sh        # Secret pattern blocker (25+ patterns, PII warnings)
 ├── skills/
 │   ├── governance-check/SKILL.md  # Quick fitness function runner
 │   ├── create-adr/SKILL.md       # ADR generator
@@ -211,17 +212,22 @@ claude-governance/
 │   └── governance-reviewer.md   # Deep compliance review agent
 ├── examples/
 │   ├── rules/                   # 5 rules for ~/.claude/rules/
-│   ├── DOMAIN.md.example        # Domain model template
-│   ├── adr-template.md          # ADR template with governance fields
+│   ├── DOMAIN.md.example              # Domain model template
+│   ├── DATA-CLASSIFICATION.md.example # Data sensitivity template [DSGAI07]
+│   ├── mcp-security-checklist.md      # MCP/plugin security checklist [DSGAI06]
+│   ├── adr-template.md                # ADR template with governance fields
 │   └── project-claude-md.example
 ├── scripts/
 │   ├── install-rules.sh         # Rules installer with backup
 │   └── bump-version.sh          # Version sync across 3 files
 ├── docs/
-│   └── adr/
-│       └── ADR-001-adopt-governance-framework.md
+│   ├── adr/
+│   │   └── ADR-001-adopt-governance-framework.md
+│   └── compliance/
+│       └── DSGAI-MAPPING.md       # OWASP DSGAI control mapping
 ├── tests/
-│   └── validate-plugin.sh       # Structural integrity (48 checks)
+│   ├── validate-plugin.sh       # Structural integrity (50+ checks)
+│   └── test-secret-scanner.sh   # Pattern-by-pattern scanner tests
 ├── .github/workflows/
 │   └── validate.yml             # CI/CD pipeline
 ├── CHANGELOG.md
@@ -265,6 +271,8 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 - **ADRs** — _Lightweight Architecture Decision Records_ (ThoughtWorks Technology Radar)
 - **Spec-Driven Dev** — Derived from Design-by-Contract (Meyer, 1986)
 - **Three Loops** — Human-AI interaction model for autonomous systems
+- **OWASP DSGAI** — _GenAI Data Security Risks and Mitigations_ v1.0 (March 2026) — [genai.owasp.org](https://genai.owasp.org)
+- **Compliance Mapping** — See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md)
 
 ---
 

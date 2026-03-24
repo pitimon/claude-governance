@@ -59,6 +59,7 @@ Scan staged/changed files for:
    - Python: `eval()`, `exec()`, `pickle.loads()`
    - Go: `unsafe.Pointer`
    - Rust: `unsafe` blocks
+9. **Agent credentials** — Check for hardcoded OAuth tokens, bearer tokens, refresh tokens, client secrets in code and config files. Patterns: `Bearer `, `oauth_token=`, `refresh_token=`, `client_secret=`, `Authorization: Bearer`. Reference: [DSGAI02].
 
 ### pre-pr
 
@@ -79,6 +80,9 @@ Periodic architecture review:
 3. **Authentication** — All non-health-check endpoints require authentication.
 4. **Rate limiting** — Public endpoints should have rate limiting configured.
 5. **Cache consistency** — Cache TTL policies are documented and consistent.
+6. **Plugin/MCP security** — If the project uses Claude Code plugins or MCP servers: (a) plugins are from trusted sources, (b) MCP tool permissions follow least-privilege (no `"allowed-tools": ["*"]`), (c) `.mcp.json` contains no hardcoded credentials. Check `.claude/settings.json` and MCP configs. Reference: [DSGAI06].
+7. **Context minimization** — Verify that session-start hooks stay under ~500 tokens, CLAUDE.md does not contain secrets or PII, and rules files do not embed real credentials as examples. Reference: [DSGAI15].
+8. **Agent credential hygiene** — Verify agent `.md` files and skill frontmatter contain no embedded credentials or API keys. Reference: [DSGAI02].
 
 ## Output Format
 
@@ -101,5 +105,7 @@ Present results as a structured checklist:
 ### Summary
 Passed: X/Y | Failed: Z | Warnings: W
 ```
+
+When a check maps to a DSGAI control, include the reference in the output line (e.g., `[DSGAI02]`).
 
 If all checks pass, congratulate the user. If any fail, provide specific file paths, line numbers, and remediation guidance.

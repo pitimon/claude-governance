@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-03-24
+
+### Added
+
+- OWASP DSGAI Tier 1 compliance — 6 controls mapped to governance framework (closes #14)
+- Secret scanner BLOCK/WARN architecture — credentials BLOCK (exit 2), PII WARN (exit 0 + stderr) (closes #9)
+- 5 new credential BLOCK patterns: Bearer token, Authorization header, oauth_token, refresh_token, client_secret (closes #11)
+- 3 PII WARN patterns: email address, SSN, credit card number [DSGAI01] (closes #9)
+- `tests/test-secret-scanner.sh` — 34 pattern-by-pattern tests in CI (closes #20)
+- Plugin/MCP security architecture checks with least-privilege validation [DSGAI06] (closes #10)
+- Context minimization architecture checks [DSGAI15] (closes #12)
+- Agent credential hygiene checks in governance-check and governance-reviewer [DSGAI02] (closes #11)
+- `examples/DATA-CLASSIFICATION.md.example` — data sensitivity template with AI/LLM data flows [DSGAI07] (closes #13)
+- `examples/mcp-security-checklist.md` — MCP/plugin security vetting checklist [DSGAI06] (closes #10)
+- `docs/compliance/DSGAI-MAPPING.md` — OWASP DSGAI control-by-control compliance matrix (closes #14)
+- DSGAI cross-references (`[DSGAI##]`) in governance-check and governance-reviewer output
+- Data classification step in `/governance-setup` workflow (step 3)
+- Agent & Plugin Security section in `examples/rules/security.md`
+- PII Protection section in `examples/rules/security.md`
+
+### Changed
+
+- Secret scanner refactored to dual-loop architecture: BLOCK_PATTERNS (25 patterns) + WARN_PATTERNS (3 patterns)
+- Session-start hook updated with DSGAI02 credential hygiene and DSGAI15 context minimization reminders
+- `examples/rules/governance.md` expanded with DSGAI-tagged checks for credentials, PII, plugin security, context minimization
+
+### Fixed
+
+- JWT pattern threshold reduced from `{20,}` to `{15,}` to match real-world JWT header lengths
+
 ## [2.2.1] - 2026-03-19
 
 ### Added

@@ -26,6 +26,8 @@ Automated governance checks — "unit tests for architecture". Self-check before
   - Python: print()
   - Go: fmt.Println
   - Rust: println!
+- No hardcoded agent credentials (OAuth tokens, bearer tokens, refresh tokens, client secrets) [DSGAI02]
+- PII patterns flagged as warnings (email, SSN, credit card numbers) [DSGAI01]
 
 ## Pre-PR Fitness Functions
 
@@ -42,3 +44,6 @@ Automated governance checks — "unit tests for architecture". Self-check before
 - Rate limiting on all public endpoints
 - Error messages do not leak internal details or stack traces
 - Authentication required on all non-health endpoints
+- Plugin/MCP permissions follow least-privilege (no wildcard tool access) [DSGAI06]
+- Context minimization — prompts, rules, and CLAUDE.md contain no embedded secrets or PII [DSGAI15]
+- Agent/skill configurations contain no embedded credentials [DSGAI02]

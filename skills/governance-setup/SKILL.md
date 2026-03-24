@@ -53,7 +53,19 @@ mkdir -p docs/adr
 
 Create `docs/adr/ADR-001-adopt-governance-framework.md` as the first ADR documenting the decision to adopt governance.
 
-### 3. Install Rules (Optional)
+### 3. Create Data Classification (Optional)
+
+Ask the user: "Would you like to create a DATA-CLASSIFICATION.md for tracking data sensitivity levels? (Recommended for projects handling PII or credentials)"
+
+If yes, copy from `${CLAUDE_PLUGIN_ROOT}/examples/DATA-CLASSIFICATION.md.example` and customize:
+
+- Ask about data elements the project handles
+- Set appropriate classification levels (Public/Internal/Confidential/Restricted)
+- Document AI/LLM data flows if applicable
+
+Reference: OWASP DSGAI07.
+
+### 4. Install Rules (Optional)
 
 Ask the user: "Would you like to install governance rules to `~/.claude/rules/`? This enables fitness function checks across all your projects."
 
@@ -69,7 +81,7 @@ If they choose to install, copy from the plugin's `examples/rules/` directory:
 cp ${CLAUDE_PLUGIN_ROOT}/examples/rules/*.md ~/.claude/rules/
 ```
 
-### 4. Update CLAUDE.md (Optional)
+### 5. Update CLAUDE.md (Optional)
 
 Ask if they want to add a governance section to their project's `CLAUDE.md`. If yes, add:
 
@@ -95,7 +107,7 @@ Ask if they want to add a governance section to their project's `CLAUDE.md`. If 
 - Breaking changes
 ```
 
-### 5. Summary
+### 6. Summary
 
 Print a summary of what was created:
 
@@ -104,11 +116,13 @@ Governance initialized:
 - DOMAIN.md — domain model (edit to match your entities)
 - docs/adr/ — architecture decision records
 - docs/adr/ADR-001 — governance adoption record
+- DATA-CLASSIFICATION.md — data sensitivity inventory (if created)
 - ~/.claude/rules/ — fitness function rules (if installed)
 
 Next steps:
 1. Edit DOMAIN.md to define your actual entities
-2. Run /governance-check to verify your project
-3. Use /spec-driven-dev for new features
-4. Use /create-adr to record decisions
+2. Review DATA-CLASSIFICATION.md for data handling compliance
+3. Run /governance-check to verify your project
+4. Use /spec-driven-dev for new features
+5. Use /create-adr to record decisions
 ```
