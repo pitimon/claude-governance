@@ -215,6 +215,8 @@ claude-governance/
 │   ├── DOMAIN.md.example              # Domain model template
 │   ├── DATA-CLASSIFICATION.md.example # Data sensitivity template [DSGAI07]
 │   ├── mcp-security-checklist.md      # MCP/plugin security checklist [DSGAI06]
+│   ├── shadow-ai-policy.md            # Shadow AI policy template [DSGAI03]
+│   ├── ai-supply-chain-checklist.md   # AI artifact vetting checklist [DSGAI04]
 │   ├── adr-template.md                # ADR template with governance fields
 │   └── project-claude-md.example
 ├── scripts/
@@ -222,7 +224,8 @@ claude-governance/
 │   └── bump-version.sh          # Version sync across 3 files
 ├── docs/
 │   ├── adr/
-│   │   └── ADR-001-adopt-governance-framework.md
+│   │   ├── ADR-001-adopt-governance-framework.md
+│   │   └── ADR-002-consequence-based-authorization.md
 │   └── compliance/
 │       └── DSGAI-MAPPING.md       # OWASP DSGAI control mapping
 ├── tests/

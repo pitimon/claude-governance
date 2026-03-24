@@ -65,6 +65,18 @@ If yes, copy from `${CLAUDE_PLUGIN_ROOT}/examples/DATA-CLASSIFICATION.md.example
 
 Reference: OWASP DSGAI07.
 
+### 3.5. Create Shadow AI Policy (Optional)
+
+Ask: "Does your team use multiple AI tools? Would you like to document an approved AI tools policy?"
+
+If yes, copy from `${CLAUDE_PLUGIN_ROOT}/examples/shadow-ai-policy.md` and customize:
+
+- List approved AI tools and their data access levels
+- Define prohibited patterns (unsanctioned tools)
+- Set review cadence
+
+Reference: OWASP DSGAI03.
+
 ### 4. Install Rules (Optional)
 
 Ask the user: "Would you like to install governance rules to `~/.claude/rules/`? This enables fitness function checks across all your projects."

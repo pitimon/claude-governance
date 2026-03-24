@@ -1,76 +1,103 @@
 # OWASP DSGAI Compliance Mapping
 
 > Maps claude-governance controls to [OWASP GenAI Data Security (DSGAI)](https://genai.owasp.org) v1.0 (March 2026).
-> Plugin version: v2.3.0 | Coverage: Tier 1 (Foundational)
+> Plugin version: v3.0.0 | Coverage: Tier 1 + Tier 2 (11 controls)
 
 ## Implemented Controls
 
-| DSGAI ID | Risk                                     | claude-governance Implementation                                                             | Component                                                                                      |
-| -------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| DSGAI01  | Sensitive Data Leakage                   | PII WARN patterns (email, SSN, credit card) — warns without blocking                         | `hooks/secret-scanner.sh`                                                                      |
-| DSGAI02  | Agent Identity & Credential Exposure     | OAuth/bearer/refresh/client_secret BLOCK patterns + agent credential governance checks       | `hooks/secret-scanner.sh`, `skills/governance-check/SKILL.md`, `agents/governance-reviewer.md` |
-| DSGAI06  | Tool, Plugin & Agent Data Exchange       | Plugin/MCP security architecture checks, MCP security checklist template                     | `skills/governance-check/SKILL.md`, `examples/mcp-security-checklist.md`                       |
-| DSGAI07  | Data Governance & Classification         | DATA-CLASSIFICATION.md template with AI/LLM data flow tracking, governance-setup integration | `examples/DATA-CLASSIFICATION.md.example`, `skills/governance-setup/SKILL.md`                  |
-| DSGAI08  | Non-Compliance & Regulatory Violations   | This compliance mapping document, DSGAI cross-references in all governance outputs           | `docs/compliance/DSGAI-MAPPING.md`                                                             |
-| DSGAI15  | Over-Broad Context & Prompt Over-Sharing | Context minimization architecture checks, session-start reminder                             | `skills/governance-check/SKILL.md`, `hooks/session-start.sh`                                   |
+| DSGAI ID | Risk                                          | claude-governance Implementation                                           | Component                                                                       |
+| -------- | --------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| DSGAI01  | Sensitive Data Leakage                        | PII WARN patterns (email, SSN, credit card)                                | `hooks/secret-scanner.sh`                                                       |
+| DSGAI02  | Agent Identity & Credential Exposure          | OAuth/bearer/refresh/client_secret BLOCK patterns + governance checks      | `hooks/secret-scanner.sh`, `skills/governance-check/SKILL.md`                   |
+| DSGAI03  | Shadow AI & Unsanctioned Data Flows           | Shadow AI policy template + architecture check for approved tooling        | `examples/shadow-ai-policy.md`, `skills/governance-check/SKILL.md`              |
+| DSGAI04  | Data, Model & Artifact Poisoning              | Model file detection, unsafe deserialization checks, AI dependency pinning | `skills/governance-check/SKILL.md`, `examples/ai-supply-chain-checklist.md`     |
+| DSGAI06  | Tool, Plugin & Agent Data Exchange            | Plugin/MCP security architecture checks, MCP security checklist            | `skills/governance-check/SKILL.md`, `examples/mcp-security-checklist.md`        |
+| DSGAI07  | Data Governance & Classification              | DATA-CLASSIFICATION.md template with AI/LLM data flow tracking             | `examples/DATA-CLASSIFICATION.md.example`, `skills/governance-setup/SKILL.md`   |
+| DSGAI08  | Non-Compliance & Regulatory Violations        | This compliance mapping, DSGAI cross-references in all outputs             | `docs/compliance/DSGAI-MAPPING.md`                                              |
+| DSGAI11  | Cross-Context & Multi-User Conversation Bleed | Session isolation + multi-tenant data separation architecture checks       | `skills/governance-check/SKILL.md`, `agents/governance-reviewer.md`             |
+| DSGAI14  | Excessive Telemetry & Monitoring Leakage      | Telemetry hygiene + telemetry redaction pre-commit checks                  | `skills/governance-check/SKILL.md`, `agents/governance-reviewer.md`             |
+| DSGAI15  | Over-Broad Context & Prompt Over-Sharing      | Context minimization architecture checks, session-start reminder           | `skills/governance-check/SKILL.md`, `hooks/session-start.sh`                    |
+| DSGAI19  | Human-in-the-Loop & Labeler Overexposure      | Consequence-based auth extending Three Loops, irreversible op safeguards   | `hooks/session-start.sh`, `docs/adr/ADR-002-consequence-based-authorization.md` |
 
-## Control Details
+## Control Details — Tier 1 (v2.3.0)
 
 ### DSGAI01 — Sensitive Data Leakage
 
 - **Scanner patterns:** Email, SSN (XXX-XX-XXXX), credit card (16 digits)
-- **Behavior:** WARN (stderr + exit 0) — does not block writes to avoid false positives on test data
-- **Governance check:** Pre-commit category references PII warnings
-- **Complementary tools:** GitLeaks, TruffleHog, `/secret-scan` (devsecops-ai-team)
+- **Behavior:** WARN (exit 0) — does not block writes
+- **Complementary tools:** GitLeaks, TruffleHog, `/secret-scan`
 
 ### DSGAI02 — Agent Identity & Credential Exposure
 
-- **Scanner patterns:** Bearer tokens, OAuth tokens, refresh tokens, client secrets (BLOCK — exit 2)
-- **Governance check:** Pre-commit item 9 (agent credentials) + architecture item 8 (credential hygiene)
-- **Single source of truth:** `hooks/secret-scanner.sh` BLOCK_PATTERNS array
+- **Scanner patterns:** Bearer, OAuth, refresh tokens, client secrets (BLOCK — exit 2)
+- **Governance check:** Pre-commit #9 + architecture #8
 
 ### DSGAI06 — Tool, Plugin & Agent Data Exchange
 
-- **Governance check:** Architecture item 6 — plugin/MCP least-privilege, trusted sources, no wildcard access
-- **Template:** `examples/mcp-security-checklist.md` — pre-install, config review, periodic audit
-- **Cross-reference:** OWASP Agentic Top 10 ASI04 (Tool/Function Abuse), ASI09 (Operational Misalignment)
+- **Governance check:** Architecture #6 — plugin/MCP least-privilege
+- **Template:** `examples/mcp-security-checklist.md`
+- **Cross-ref:** OWASP Agentic ASI04, ASI09
 
 ### DSGAI07 — Data Governance & Classification
 
-- **Template:** `examples/DATA-CLASSIFICATION.md.example` — 4 levels (Public/Internal/Confidential/Restricted)
-- **Integration:** `/governance-setup` step 3 offers data classification during project init
-- **AI-specific:** Tracks what data is sent to LLMs and minimization strategies
+- **Template:** `examples/DATA-CLASSIFICATION.md.example` — 4 levels
+- **Integration:** `/governance-setup` step 3
 
 ### DSGAI08 — Non-Compliance & Regulatory Violations
 
-- **This document** maps controls to DSGAI risks
-- **All governance outputs** include `[DSGAI##]` references where applicable
-- **Coverage gaps** explicitly documented below
+- **This document** + `[DSGAI##]` tags in all governance outputs
 
 ### DSGAI15 — Over-Broad Context & Prompt Over-Sharing
 
-- **Governance check:** Architecture item 7 — session hooks < 500 tokens, no secrets in CLAUDE.md
-- **Session-start:** Context minimization reminder injected every session
-- **Root cause mitigation:** Reducing context surface shrinks attack surface for DSGAI01, DSGAI09, DSGAI18
+- **Governance check:** Architecture #7 — session hooks < 500 tokens, no secrets in CLAUDE.md
 
-## Coverage Gaps (Planned for v3.0.0)
+## Control Details — Tier 2 (v3.0.0)
 
-| DSGAI ID | Risk                                          | Status                            | Milestone |
-| -------- | --------------------------------------------- | --------------------------------- | --------- |
-| DSGAI03  | Shadow AI & Unsanctioned Data Flows           | Planned (#15)                     | v3.0.0    |
-| DSGAI04  | Data, Model & Artifact Poisoning              | Planned (#16)                     | v3.0.0    |
-| DSGAI05  | Data Integrity & Validation Failures          | Not started                       | —         |
-| DSGAI09  | Multimodal Capture & Cross-Channel Leakage    | Not applicable (text-only plugin) | —         |
-| DSGAI11  | Cross-Context & Multi-User Conversation Bleed | Planned (#19)                     | v3.0.0    |
-| DSGAI12  | Unsafe Natural-Language Data Gateways         | Deferred to `/genai-data-scan`    | —         |
-| DSGAI13  | Vector Store Platform Data Security           | Deferred to `/agentic-scan`       | —         |
-| DSGAI14  | Excessive Telemetry & Monitoring Leakage      | Planned (#17)                     | v3.0.0    |
-| DSGAI19  | Human-in-the-Loop & Labeler Overexposure      | Planned (#18)                     | v3.0.0    |
+### DSGAI03 — Shadow AI & Unsanctioned Data Flows
+
+- **Template:** `examples/shadow-ai-policy.md` — approved tools, data rules, prohibited patterns, exceptions
+- **Governance check:** Architecture #9 — verify approved AI tooling documented
+- **Integration:** `/governance-setup` step 3.5 offers Shadow AI policy creation
+- **Win-Win (H4):** Includes approved alternatives, not just prohibitions
+
+### DSGAI04 — Data, Model & Artifact Poisoning
+
+- **Governance check:** Pre-commit #10 (model files), #11 (unsafe deserialization), #12 (dependency pinning)
+- **Template:** `examples/ai-supply-chain-checklist.md` — model vetting, dataset provenance, safe alternatives
+- **Security rule:** AI Artifact Security section in `examples/rules/security.md`
+- **Cross-ref:** OWASP LLM Top 10 LLM03 (Supply Chain)
+
+### DSGAI11 — Cross-Context & Multi-User Conversation Bleed
+
+- **Governance check:** Architecture #11 (session isolation), #12 (multi-tenant separation)
+- **Deep review:** `governance-reviewer` checks memory scoping, cache keys, tenant isolation
+- **Security rule:** Session Isolation section in `examples/rules/security.md`
+
+### DSGAI14 — Excessive Telemetry & Monitoring Leakage
+
+- **Governance check:** Pre-commit #13 (telemetry hygiene), #14 (telemetry redaction)
+- **Deep review:** `governance-reviewer` reviews observability configs
+- **Security rule:** Telemetry Hygiene section in `examples/rules/security.md`
+- **Key patterns:** `log.*prompt`, `log.*context`, `logger.*user_input`
+
+### DSGAI19 — Human-in-the-Loop & Labeler Overexposure
+
+- **Three Loops extension:** Consequence Override — irreversible ops always In-the-Loop
+- **ADR:** `docs/adr/ADR-002-consequence-based-authorization.md`
+- **Governance check:** Architecture #10 (irreversible operation safeguards)
+- **Consequence levels:** Reversible → Contained → Broad → Irreversible
+
+## Remaining Gaps
+
+| DSGAI ID | Risk                                       | Status                            |
+| -------- | ------------------------------------------ | --------------------------------- |
+| DSGAI05  | Data Integrity & Validation Failures       | Not started                       |
+| DSGAI09  | Multimodal Capture & Cross-Channel Leakage | Not applicable (text-only plugin) |
+| DSGAI12  | Unsafe Natural-Language Data Gateways      | Deferred to `/genai-data-scan`    |
+| DSGAI13  | Vector Store Platform Data Security        | Deferred to `/agentic-scan`       |
 
 ## Complementary Tools
 
-For DSGAI controls beyond claude-governance's scope, use:
-
-- **devsecops-ai-team** plugin: `/genai-data-scan` (DSGAI full scan), `/agentic-scan` (OWASP Agentic Top 10), `/mcp-scan` (MCP security)
-- **GitLeaks / TruffleHog:** Git history secret scanning (DSGAI01 Tier 2)
+- **devsecops-ai-team** plugin: `/genai-data-scan` (DSGAI full scan), `/agentic-scan` (Agentic Top 10), `/mcp-scan` (MCP security)
+- **GitLeaks / TruffleHog:** Git history secret scanning (DSGAI01 Tier 3)
 - **Checkov / Trivy:** IaC and container security (DSGAI04/05)

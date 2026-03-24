@@ -73,6 +73,10 @@ For each changed file:
 
 **Agent credentials** [DSGAI02]: Search for OAuth/bearer patterns — `Bearer `, `oauth_token`, `refresh_token`, `client_secret`, `Authorization:`. Flag hardcoded credentials in agent configs, skill files, and MCP settings.
 
+**AI artifact provenance** [DSGAI04]: Flag committed model files (`.onnx`, `.safetensors`, `.gguf`, `.pt`, `.pkl`). Check for `torch.load()` and `pickle.load()` without safe alternatives. Verify AI dependencies are version-pinned in requirements files.
+
+**Telemetry hygiene** [DSGAI14]: Review logging and observability configs for sensitive data exposure. Flag patterns that log full prompts, user inputs, or conversation contexts in production code. Verify telemetry redaction is configured.
+
 ### 4. Domain Invariant Check
 
 If `DOMAIN.md` exists:
@@ -89,6 +93,9 @@ If `DOMAIN.md` exists:
 - Plugin/MCP security: Check `.mcp.json` and `.claude/settings.json` for overly broad permissions. Verify MCP servers use least-privilege tool access. [DSGAI06]
 - Context minimization: Verify session-start hooks, CLAUDE.md, and rules files do not embed secrets, PII, or excessive sensitive context. [DSGAI15]
 - Agent credential hygiene: Verify agent and skill config files contain no embedded credentials. [DSGAI02]
+- Shadow AI policy: If project has shadow-ai-policy.md, check that approved AI tooling is documented and unsanctioned tools are flagged. [DSGAI03]
+- Consequence-based authorization: Verify irreversible operations (production deploy, data deletion, schema migration) have human approval gates, dry-run modes, or rollback plans. [DSGAI19]
+- Cross-context bleed: Review session isolation — agent memory scoped per-project/user, cache keys include scope, no shared state between tenants. [DSGAI11]
 
 ### 6. Output
 

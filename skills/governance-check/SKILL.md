@@ -20,6 +20,8 @@ Run the requested governance check category. Default to `all` if no argument pro
 
 For deep multi-file review with severity grading and domain invariant analysis, use the `governance-reviewer` agent instead.
 
+**Consequence classification**: If the task involves irreversible operations (production deploy, data migration, credential rotation), classify as In-the-Loop regardless of task type. [DSGAI19]
+
 ## Project Type Detection
 
 Before running checks, detect the project's primary language:
@@ -60,6 +62,11 @@ Scan staged/changed files for:
    - Go: `unsafe.Pointer`
    - Rust: `unsafe` blocks
 9. **Agent credentials** — Check for hardcoded OAuth tokens, bearer tokens, refresh tokens, client secrets in code and config files. Patterns: `Bearer `, `oauth_token=`, `refresh_token=`, `client_secret=`, `Authorization: Bearer`. Reference: [DSGAI02].
+10. **AI model artifacts** — Flag committed model files (`.onnx`, `.safetensors`, `.gguf`, `.pt`, `.pkl`, `.bin` >10MB). These should be tracked via Git LFS or external artifact registry, not committed directly. [DSGAI04]
+11. **Unsafe deserialization** — Flag `torch.load()`, `pickle.load()`, `pickle.loads()`, `yaml.unsafe_load()`, `joblib.load()` without safe alternatives (`weights_only=True`, `safetensors`). [DSGAI04]
+12. **AI dependency pinning** — In requirements.txt/pyproject.toml, flag unpinned AI packages (torch, transformers, openai, anthropic, langchain) using `>=` or no version pin. [DSGAI04]
+13. **Telemetry hygiene** — Flag patterns logging full prompts/contexts in production: `log.*prompt`, `log.*context`, `logger.*user_input`, `console.log.*messages`, `logging.*completion`. Allow in test/debug files. [DSGAI14]
+14. **Telemetry redaction** — If observability configs exist (OpenTelemetry, Datadog, Sentry), verify PII/prompt scrubbing is configured. [DSGAI14]
 
 ### pre-pr
 
@@ -83,6 +90,10 @@ Periodic architecture review:
 6. **Plugin/MCP security** — If the project uses Claude Code plugins or MCP servers: (a) plugins are from trusted sources, (b) MCP tool permissions follow least-privilege (no `"allowed-tools": ["*"]`), (c) `.mcp.json` contains no hardcoded credentials. Check `.claude/settings.json` and MCP configs. Reference: [DSGAI06].
 7. **Context minimization** — Verify that session-start hooks stay under ~500 tokens, CLAUDE.md does not contain secrets or PII, and rules files do not embed real credentials as examples. Reference: [DSGAI15].
 8. **Agent credential hygiene** — Verify agent `.md` files and skill frontmatter contain no embedded credentials or API keys. Reference: [DSGAI02].
+9. **Shadow AI policy** — If project has `shadow-ai-policy.md`, verify approved AI tooling is documented. Flag references to unsanctioned AI tool endpoints in source code or configs. [DSGAI03]
+10. **Irreversible operation safeguards** — Scripts/code performing destructive operations (DROP TABLE, `rm -rf`, force push, production deploy) must have confirmation gates or dry-run modes. [DSGAI19]
+11. **Session isolation** — Agent memory/state must be scoped per-project and per-user. Cache keys must include user/project/session scope. Flag global state stores without scope qualifiers. [DSGAI11]
+12. **Multi-tenant data separation** — In multi-tenant code, verify tenant ID is included in all database queries, cache keys, and file paths. Flag shared state without tenant scoping. [DSGAI11]
 
 ## Output Format
 

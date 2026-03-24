@@ -212,7 +212,23 @@ else
   fail "scripts/bump-version.sh not found"
 fi
 
-# 3.8 Secret scanner test suite
+# 3.8 Additional example templates
+for ex_extra in "shadow-ai-policy.md" "ai-supply-chain-checklist.md"; do
+  if [[ -f "$REPO_ROOT/examples/$ex_extra" ]]; then
+    pass "examples/$ex_extra exists"
+  else
+    fail "examples/$ex_extra not found"
+  fi
+done
+
+# 3.9 ADR-002
+if [[ -f "$REPO_ROOT/docs/adr/ADR-002-consequence-based-authorization.md" ]]; then
+  pass "docs/adr/ADR-002 exists"
+else
+  fail "docs/adr/ADR-002 not found"
+fi
+
+# 3.10 Secret scanner test suite
 test_suite="$REPO_ROOT/tests/test-secret-scanner.sh"
 if [[ -f "$test_suite" ]]; then
   pass "tests/test-secret-scanner.sh exists"

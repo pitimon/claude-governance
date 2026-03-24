@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-03-24
+
+### Added
+
+- Shadow AI policy template with approved/prohibited tools, data rules, approved alternatives [DSGAI03] (closes #15)
+- AI supply chain security checklist for model vetting, dependency pinning, unsafe deserialization [DSGAI04] (closes #16)
+- Telemetry & logging hygiene governance checks — flags prompt/context logging in production [DSGAI14] (closes #17)
+- Consequence-based authorization — extends Three Loops with blast radius dimension [DSGAI19] (closes #18)
+- ADR-002: Consequence-Based Authorization — documents Three Loops extension with 4 consequence levels
+- Cross-context bleed detection — session isolation + multi-tenant separation checks [DSGAI11] (closes #19)
+- 9 new governance checks (total: 31 across pre-commit/pre-pr/architecture)
+- 3 new security rule sections (AI artifacts, telemetry hygiene, session isolation)
+- Shadow AI policy step in `/governance-setup` wizard (step 3.5)
+- Consequence Override in session-start: irreversible operations always In-the-Loop
+
+### Changed
+
+- DSGAI-MAPPING.md: 11 controls implemented (up from 6), coverage gaps reduced to 4
+- Three Loops model extended from 1D (task type) to 2D (task type x blast radius)
+- Session-start context updated with consequence dimension (~360 tokens)
+- **MAJOR**: governance-check grows from 22 to 31 checks with 5 new DSGAI controls
+
 ## [2.3.0] - 2026-03-24
 
 ### Added

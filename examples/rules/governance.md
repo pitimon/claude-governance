@@ -8,6 +8,7 @@ Automated governance checks — "unit tests for architecture". Self-check before
 - Domain invariants from DOMAIN.md are identified and preserved
 - Decision autonomy level is appropriate (Three Loops)
 - Breaking changes are identified and flagged to human
+- Irreversible operations classified as In-the-Loop regardless of task type [DSGAI19]
 
 ## Pre-Commit Fitness Functions
 
@@ -28,6 +29,9 @@ Automated governance checks — "unit tests for architecture". Self-check before
   - Rust: println!
 - No hardcoded agent credentials (OAuth tokens, bearer tokens, refresh tokens, client secrets) [DSGAI02]
 - PII patterns flagged as warnings (email, SSN, credit card numbers) [DSGAI01]
+- No AI model files committed directly (.onnx, .safetensors, .gguf, .pt) — use Git LFS [DSGAI04]
+- No unsafe deserialization (torch.load, pickle.load without safe mode) [DSGAI04]
+- No full prompt/context logging in production code [DSGAI14]
 
 ## Pre-PR Fitness Functions
 
@@ -47,3 +51,6 @@ Automated governance checks — "unit tests for architecture". Self-check before
 - Plugin/MCP permissions follow least-privilege (no wildcard tool access) [DSGAI06]
 - Context minimization — prompts, rules, and CLAUDE.md contain no embedded secrets or PII [DSGAI15]
 - Agent/skill configurations contain no embedded credentials [DSGAI02]
+- Shadow AI tooling documented and approved [DSGAI03]
+- Irreversible operations have confirmation gates or dry-run modes [DSGAI19]
+- Agent memory scoped per-project/user, cache keys include scope [DSGAI11]

@@ -42,6 +42,28 @@ PII patterns are flagged as warnings (not blocked) by the secret scanner:
 - Review warnings before committing — ensure PII handling complies with privacy policies
 - Use DATA-CLASSIFICATION.md to document data sensitivity levels
 
+## AI Artifact Security [DSGAI04]
+
+- Model files (.onnx, .safetensors, .gguf, .pt) must NOT be committed to git — use Git LFS or artifact registry
+- AI dependencies must be version-pinned (exact `==`, not `>=`)
+- `torch.load()` requires `weights_only=True`; prefer `safetensors` format over pickle-based
+- Verify model checksums before loading from external sources
+
+## Telemetry Hygiene [DSGAI14]
+
+- Never log full prompts, completions, or conversation contexts in production
+- Redact PII before sending to observability platforms (Datadog, Sentry, OpenTelemetry)
+- Capture metrics (latency, token count, error rate), not content
+- Patterns to avoid: `logger.info(f"Prompt: {prompt}")`, `console.log(messages)`, `log.debug(request.body)`
+
+## Session Isolation [DSGAI11]
+
+- Agent memory and state must be scoped per-project and per-user
+- Cache keys must include user/project/session identifiers
+- Multi-tenant systems must enforce tenant isolation at query level
+- Never share conversation context between different users or projects
+- File-based caches must use project-scoped paths
+
 ## Security Response Protocol
 
 If security issue found:
