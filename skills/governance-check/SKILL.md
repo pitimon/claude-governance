@@ -41,7 +41,7 @@ If multiple indicators exist, check all relevant languages. If none match, apply
 
 Scan staged/changed files for:
 
-1. **Hardcoded secrets** — Search for patterns: `API_KEY=`, `password=`, `sk-`, `sk-ant-`, `ghp_`, `AKIA`, hardcoded token strings, `-----BEGIN PRIVATE KEY-----`, JWT tokens (`eyJ...`), Google API keys (`AIza...`), Azure connection strings, MongoDB URIs. Use `git diff --cached` or `git diff` to get changed content.
+1. **Hardcoded secrets** — Search for patterns: `API_KEY=`, `password=`, `sk-`, `sk-ant-`, `ghp_`, `AKIA`, hardcoded token strings, `-----BEGIN PRIVATE KEY-----`, JWT tokens (`eyJ...`), Google API keys (`AIza...`), Azure connection strings, MongoDB URIs. PII patterns (email, SSN, credit card) generate warnings [DSGAI01]. Use `git diff --cached` or `git diff` to get changed content.
 2. **Input validation** — New API endpoints/route handlers MUST have input validation. Check for language-appropriate validation:
    - JS/TS: Zod, joi, yup, express-validator
    - Python: pydantic, marshmallow, cerberus
@@ -117,6 +117,6 @@ Present results as a structured checklist:
 Passed: X/Y | Failed: Z | Warnings: W
 ```
 
-When a check maps to a DSGAI control, include the reference in the output line (e.g., `[DSGAI02]`).
+When a check maps to a DSGAI control, include the reference in the output line (e.g., `[DSGAI02]`). For compliance mapping, see `docs/compliance/DSGAI-MAPPING.md` [DSGAI08]. Data classification guidance: `examples/DATA-CLASSIFICATION.md.example` [DSGAI07].
 
 If all checks pass, congratulate the user. If any fail, provide specific file paths, line numbers, and remediation guidance.
