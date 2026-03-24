@@ -1,13 +1,14 @@
 <p align="center">
   <h1 align="center">claude-governance</h1>
   <p align="center">
-    Governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, and architectural decision records.
+    Governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, and OWASP DSGAI compliance.
   </p>
   <p align="center">
     <a href="https://github.com/pitimon/claude-governance/actions/workflows/validate.yml"><img src="https://github.com/pitimon/claude-governance/actions/workflows/validate.yml/badge.svg" alt="Validate Plugin"></a>
     <a href="https://github.com/pitimon/claude-governance/releases/latest"><img src="https://img.shields.io/github/v/release/pitimon/claude-governance?label=version" alt="Version"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/pitimon/claude-governance" alt="License"></a>
     <img src="https://img.shields.io/badge/dependencies-zero-brightgreen" alt="Zero Dependencies">
+    <img src="https://img.shields.io/badge/OWASP_DSGAI-11_controls-orange" alt="DSGAI Controls">
     <img src="https://img.shields.io/badge/languages-JS%2FTS%20%7C%20Python%20%7C%20Go%20%7C%20Rust-blue" alt="Language Support">
   </p>
 </p>
@@ -18,134 +19,239 @@
 
 ## Why claude-governance?
 
-AI code generation is fast but ungoverned. Without guardrails:
+AI-assisted development is fast — but ungoverned AI is a liability.
 
-- **Secrets leak** — API keys hardcoded in source files slip into git history
-- **Quality drifts** — No consistent standards across sessions or developers
-- **Decisions vanish** — Architecture choices are lost between conversations
-- **Oversight gaps** — No framework for when AI should act vs. when humans should decide
+| Without Governance | With claude-governance |
+| --- | --- |
+| `sk-ant-api03-xxx` committed to git | Blocked before it reaches the filesystem |
+| Junior dev deploys to production via AI | Three Loops classifies it as In-the-Loop — human decides |
+| Prompt context leaks PII to observability | Telemetry hygiene check flags `log(prompt)` patterns |
+| Team uses 5 different AI tools with no policy | Shadow AI policy template — approved tools, data rules |
+| "Who decided to use MongoDB?" — no one knows | ADR system records every architecture decision |
 
-**claude-governance** solves this with a zero-dependency plugin that runs inside Claude Code — no build steps, no runtime overhead, just Markdown skills and shell scripts.
+**Zero dependencies.** Zero build steps. Zero runtime overhead. Just Markdown skills and shell scripts that run inside Claude Code.
+
+---
+
+## What Happens When You Install
+
+```
+Session starts...
+
+  Governance Framework Active
+
+  Three Loops Decision Model:
+  - Out-of-Loop (AI autonomous): formatting, lint, simple fixes
+  - On-the-Loop (AI proposes): features, API changes
+  - In-the-Loop (Human decides): architecture, security, breaking changes
+
+  Consequence Override: Irreversible operations → always In-the-Loop
+```
+
+From this point, every `Edit`/`Write` is scanned for secrets. Every governance check is one command away.
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Add marketplace
+# Install (one-time)
 claude plugin marketplace add pitimon/claude-governance
-
-# 2. Install plugin
 claude plugin install claude-governance@claude-governance
 
-# 3. (Optional) Install rules to ~/.claude/rules/
+# (Optional) Install rules to ~/.claude/rules/
 bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh
 ```
-
-Start a new session — governance context loads automatically (~300 tokens).
 
 ---
 
-## Features
+## Real-World Usage Examples
 
-### Always-On Hooks
+### Catch a leaked API key before it enters git
 
-| Hook                   | Event          | What It Does                                                   |
-| ---------------------- | -------------- | -------------------------------------------------------------- |
-| **Governance context** | `SessionStart` | Injects Three Loops model + fitness functions (~300 tokens)    |
-| **Secret scanner**     | `PreToolUse`   | Blocks `Edit`/`Write`/`MultiEdit` containing hardcoded secrets |
+```
+You: Write the config file with the API key
 
-### Secret Scanner — 25+ Patterns
+Claude writes: api_key = "sk-ant-api03-xxxxx"
 
-The scanner detects secrets and PII in real-time before they reach the filesystem:
+  Governance: Blocked — Anthropic API key detected.
+  Use environment variables instead:
+    JS/TS:  const value = process.env.YOUR_SECRET
+    Python: value = os.environ['YOUR_SECRET']
+    Go:     value := os.Getenv("YOUR_SECRET")
+```
 
-| Category        | Patterns                                                                                        | Behavior |
-| --------------- | ----------------------------------------------------------------------------------------------- | -------- |
-| AI/ML keys      | `sk-*` (OpenAI/Stripe), `sk-ant-*` (Anthropic), `sk-proj-*` (OpenAI project)                    | BLOCK    |
-| Cloud providers | `AKIA*` (AWS), `AIza*` (Google), Azure connection strings                                       | BLOCK    |
-| Git platforms   | `ghp_*`, `gho_*`, `ghs_*` (GitHub), `GITHUB_TOKEN=`, `GH_TOKEN=`                                | BLOCK    |
-| Communication   | `xox[bpsar]-*` (Slack)                                                                          | BLOCK    |
-| Credentials     | `API_KEY=`, `password=`, `token=`, `Bearer`, `oauth_token=`, `refresh_token=`, `client_secret=` | BLOCK    |
-| Crypto/Auth     | `-----BEGIN PRIVATE KEY-----`, JWT (`eyJ...`)                                                   | BLOCK    |
-| Databases       | MongoDB connection strings                                                                      | BLOCK    |
-| PII detection   | Email addresses, SSN (XXX-XX-XXXX), credit card numbers [DSGAI01]                               | WARN     |
+### Run pre-commit governance checks
 
-> **Limitations:** The scanner is a first line of defense. It does not detect multi-line secrets, base64-encoded values, or variable indirection. For comprehensive scanning, use [GitLeaks](https://github.com/gitleaks/gitleaks), [TruffleHog](https://github.com/trufflesecurity/trufflehog), or the `/secret-scan` skill from [devsecops-ai-team](https://github.com/pitimon/devsecops-ai-team).
+```
+You: /governance-check pre-commit
 
-### Skills & Agent
+  ## Governance Check: pre-commit
 
-| Component             | Usage                          | Purpose                                                 |
-| --------------------- | ------------------------------ | ------------------------------------------------------- |
-| `/governance-check`   | `/governance-check pre-commit` | Quick fitness function checklist — fast pass/fail       |
-| `/create-adr`         | `/create-adr "Title"`          | Generate Architecture Decision Record                   |
-| `/spec-driven-dev`    | `/spec-driven-dev`             | Spec-first development: define WHAT, AI implements HOW  |
-| `/governance-setup`   | `/governance-setup`            | Initialize governance in any project                    |
-| `governance-reviewer` | Auto-triggered                 | Deep multi-file compliance review with severity grading |
+  ### Passed
+  - [x] No hardcoded secrets found
+  - [x] Input validation present (Zod schema)
+  - [x] File sizes within limits
+  - [x] No debug prints in production
+
+  ### Failed
+  - [ ] FAIL: `src/ml/loader.py:12` — torch.load() without weights_only=True [DSGAI04]
+  - [ ] FAIL: `src/api/handler.ts` — 847 lines (max 800)
+
+  Passed: 8/10 | Failed: 2
+```
+
+### Classify a task with Three Loops + Consequence
+
+```
+You: Format the deployment config and push to production
+
+Claude: This task is Out-of-Loop (formatting) BUT involves irreversible
+        consequence (production deploy). Per ADR-002 Consequence Override:
+        Irreversible → always In-the-Loop.
+
+        I'll format the file, but you should review and deploy manually.
+```
+
+### Initialize governance in a new project
+
+```
+You: /governance-setup
+
+  Step 1: Creating DOMAIN.md...
+  Step 2: Setting up docs/adr/
+  Step 3: Data Classification (Optional)
+  Step 3.5: Shadow AI Policy (Optional)
+  Step 4: Install Rules
+
+  Governance initialized:
+  - DOMAIN.md — edit to define your entities
+  - docs/adr/ADR-001 — governance adoption record
+  - DATA-CLASSIFICATION.md — data sensitivity levels
+  - shadow-ai-policy.md — approved AI tools
+```
+
+---
+
+## Features at a Glance
+
+### Always-On (Hooks)
+
+| Hook | Trigger | What It Does |
+| --- | --- | --- |
+| **Governance context** | Session start | Injects Three Loops + Consequence Override (~360 tokens) |
+| **Secret scanner** | Every `Edit`/`Write` | 25 BLOCK patterns (secrets) + 3 WARN patterns (PII) |
+
+### On-Demand (Skills & Agent)
+
+| Command | When to Use | Example |
+| --- | --- | --- |
+| `/governance-check` | Before commit/push | `/governance-check pre-commit` |
+| `/create-adr` | After architecture decision | `/create-adr "Adopt PostgreSQL over MongoDB"` |
+| `/spec-driven-dev` | Before feature implementation | `/spec-driven-dev` → writes spec.md |
+| `/governance-setup` | New project initialization | Creates DOMAIN.md, ADRs, rules |
+| `governance-reviewer` | Before PR (auto-triggered) | Deep multi-file review with severity grading |
+
+### 31 Governance Checks
+
+| Category | Count | Key Checks |
+| --- | --- | --- |
+| **Pre-Commit** | 14 | Secrets, input validation, file size, debug prints, AI model artifacts, unsafe deserialization, telemetry hygiene |
+| **Pre-PR** | 5 | Conventional commits, DOMAIN.md sync, test coverage >= 80% |
+| **Architecture** | 12 | Service boundaries, auth coverage, plugin/MCP security, session isolation, consequence safeguards |
+
+### OWASP DSGAI Compliance — 11 Controls
+
+Mapped to [OWASP GenAI Data Security](https://genai.owasp.org) v1.0 (March 2026):
+
+| Control | Risk | What We Do |
+| --- | --- | --- |
+| DSGAI01 | Sensitive Data Leakage | PII WARN patterns (email, SSN, credit card) |
+| DSGAI02 | Agent Credential Exposure | BLOCK patterns for OAuth, Bearer, refresh tokens |
+| DSGAI03 | Shadow AI | Policy template with approved alternatives |
+| DSGAI04 | Data/Model Poisoning | Model file detection, unsafe deserialization, dependency pinning |
+| DSGAI06 | Plugin/Tool Data Exchange | MCP security checklist, least-privilege checks |
+| DSGAI07 | Data Classification | 4-level classification template with AI/LLM data flows |
+| DSGAI08 | Compliance Violations | This compliance mapping + `[DSGAI##]` tags in all outputs |
+| DSGAI11 | Cross-Context Bleed | Session isolation, multi-tenant separation checks |
+| DSGAI14 | Telemetry Leakage | Flags `log(prompt)` patterns in production code |
+| DSGAI15 | Over-Broad Context | Context minimization checks, token budget enforcement |
+| DSGAI19 | Human-in-the-Loop Gaps | Consequence-based auth — irreversible ops always In-the-Loop |
+
+See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md) for the full control-by-control mapping.
 
 ### Language Support
 
-Governance checks are language-agnostic with specific rules per stack:
+Governance checks detect the project's language and apply stack-specific rules:
 
-| Check        | JS/TS                 | Python                               | Go               | Rust             |
-| ------------ | --------------------- | ------------------------------------ | ---------------- | ---------------- |
-| Debug prints | `console.log`         | `print()`                            | `fmt.Println`    | `println!`       |
-| Validation   | Zod, joi, yup         | pydantic, marshmallow                | go-validator     | serde, validator |
-| Dangerous    | `eval()`, `innerHTML` | `eval()`, `exec()`, `pickle.loads()` | `unsafe.Pointer` | `unsafe` blocks  |
-| Detection    | `package.json`        | `pyproject.toml`, `requirements.txt` | `go.mod`         | `Cargo.toml`     |
+| Check | JS/TS | Python | Go | Rust |
+| --- | --- | --- | --- | --- |
+| Debug prints | `console.log` | `print()` | `fmt.Println` | `println!` |
+| Validation | Zod, joi, yup | pydantic, marshmallow | go-validator | serde, validator |
+| Dangerous | `eval()`, `innerHTML` | `eval()`, `exec()`, `pickle.loads()` | `unsafe.Pointer` | `unsafe` blocks |
+| Detection | `package.json` | `pyproject.toml` | `go.mod` | `Cargo.toml` |
 
-### Rules (Optional)
+### Ready-to-Use Templates
 
-5 ready-to-use rules for `~/.claude/rules/`:
+| Template | Purpose | Reference |
+| --- | --- | --- |
+| `DATA-CLASSIFICATION.md.example` | 4-level data sensitivity with AI/LLM data flows | DSGAI07 |
+| `mcp-security-checklist.md` | Plugin/MCP vetting before installation | DSGAI06 |
+| `shadow-ai-policy.md` | Approved AI tools, data rules, exceptions | DSGAI03 |
+| `ai-supply-chain-checklist.md` | Model vetting, dependency pinning, safe alternatives | DSGAI04 |
+| `DOMAIN.md.example` | Entity definitions, invariants, API contracts | — |
+| `adr-template.md` | Architecture Decision Record with governance loop | — |
 
-| Rule              | Focus                                   |
-| ----------------- | --------------------------------------- |
-| `governance.md`   | Fitness functions at every stage        |
-| `coding-style.md` | Immutability, file size, error handling |
-| `git-workflow.md` | Conventional commits, PR workflow       |
-| `testing.md`      | TDD, 80% coverage minimum               |
-| `security.md`     | No secrets, input validation, OWASP     |
+### Rules for `~/.claude/rules/`
 
-```bash
-# Install all rules (backs up existing files)
-bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh
-
-# Governance rule only
-bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh --governance-only
-```
+| Rule | Focus |
+| --- | --- |
+| `governance.md` | Fitness functions: pre-implementation, pre-commit, pre-PR, architecture |
+| `security.md` | Secret management, agent/plugin security, PII, telemetry, session isolation |
+| `coding-style.md` | Immutability, file size limits, error handling |
+| `git-workflow.md` | Conventional commits, PR workflow, TDD |
+| `testing.md` | 80% coverage minimum, unit/integration/E2E |
 
 ---
 
 ## Core Concepts
 
-### Three Loops Decision Model
+### Three Loops + Consequence-Based Authorization
 
-Classify every task by AI autonomy level:
+Every task is classified on two dimensions:
 
-| Loop            | AI Role                          | Examples                                                 |
-| --------------- | -------------------------------- | -------------------------------------------------------- |
-| **Out-of-Loop** | AI executes, human reviews after | Formatting, lint, imports, simple bug fixes              |
-| **On-the-Loop** | AI proposes, human approves      | Features, API changes, refactoring > 3 files             |
-| **In-the-Loop** | Human decides, AI assists        | Architecture, security, breaking changes, data migration |
+```
+                      Task Type
+                      Out-of-Loop    On-the-Loop    In-the-Loop
+Consequence
+  Reversible          autonomous      propose         human-driven
+  Contained           autonomous      propose         human-driven
+  Broad               propose         propose         human-driven
+  Irreversible        HUMAN-DRIVEN    HUMAN-DRIVEN    human-driven
+```
+
+**Override rule:** Irreversible operations (production deploy, data deletion, credential rotation) are **always In-the-Loop** — even if the task itself is trivial. See [ADR-002](docs/adr/ADR-002-consequence-based-authorization.md).
 
 ### Fitness Functions
 
 Automated governance checks — "unit tests for architecture":
 
-| Stage            | Checks                                                                                                                     |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Pre-Commit**   | No secrets, input validation, parameterized queries, file < 800 lines, functions < 50 lines, immutability, no debug prints |
-| **Pre-PR**       | Conventional commits, DOMAIN.md updated, test coverage >= 80%, TODO context                                                |
-| **Architecture** | Service boundaries, error message safety, auth coverage, rate limiting                                                     |
+| Stage | What Gets Checked |
+| --- | --- |
+| **Pre-Implementation** | Spec exists, domain invariants identified, autonomy classified, irreversible ops flagged |
+| **Pre-Commit** | 14 checks: secrets, PII, validation, file size, functions, immutability, debug prints, AI artifacts, deserialization, deps, telemetry |
+| **Pre-PR** | 5 checks: conventional commits, DOMAIN.md, breaking changes, test coverage, TODO context |
+| **Architecture** | 12 checks: service boundaries, auth, rate limiting, plugin/MCP, context minimization, session isolation, consequence safeguards |
 
 ### Spec-Driven Development
 
 ```
 Understand ──> Specify ──> Plan ──> Implement ──> Verify
-    │              │          │          │            │
- Explore       Write      Plan Mode  Code to     Check criteria
- codebase      spec.md    from spec  spec        Run tests
- Clarify       Acceptance            On-the-Loop Validate domain
- requirements  criteria              iterations  invariants
+     │              │          │          │            │
+  Explore       Write      Plan Mode  Code to     Check criteria
+  codebase      spec.md    from spec  spec        Run tests
+  Clarify       Acceptance            On-the-Loop Validate domain
+  requirements  criteria              iterations  invariants
 ```
 
 ---
@@ -155,40 +261,47 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 ```mermaid
 graph TB
     subgraph "Always-On"
-        H1["SessionStart Hook<br/>Governance Context"]
-        H2["PreToolUse Hook<br/>Secret Scanner"]
+        H1["SessionStart Hook<br/>Three Loops + Consequence"]
+        H2["PreToolUse Hook<br/>Secret Scanner (25 BLOCK + 3 WARN)"]
     end
 
     subgraph "On-Demand"
-        C1["/governance-check<br/><i>quick checklist</i>"]
+        C1["/governance-check<br/><i>31 checks, 3 categories</i>"]
         C2["/create-adr"]
         S1["/spec-driven-dev"]
         S2["/governance-setup"]
-        A1["governance-reviewer<br/><i>deep review</i>"]
+        A1["governance-reviewer<br/><i>deep review + severity</i>"]
     end
 
     subgraph "Configuration"
-        R1["~/.claude/rules/"]
+        R1["~/.claude/rules/<br/>5 rule files"]
+        T1["Templates<br/>6 examples"]
     end
 
-    H1 -->|~300 tokens| SESSION["Every Session"]
+    subgraph "Compliance"
+        D1["DSGAI-MAPPING.md<br/>11 OWASP controls"]
+        D2["ADR-001 + ADR-002"]
+    end
+
+    H1 -->|~360 tokens| SESSION["Every Session"]
     H2 -->|blocks secrets| WRITES["File Writes"]
     R1 -->|always loaded| SESSION
     C1 & A1 -->|on demand| CHECK["Compliance Report"]
+    D1 -->|maps to| CHECK
 ```
 
 ---
 
 ## Token Budget
 
-| Component            | Tokens   | When                        |
-| -------------------- | -------- | --------------------------- |
-| SessionStart hook    | ~300     | Every session               |
-| Secret scanner       | 0        | Shell script, no token cost |
-| Rules (if installed) | ~500-800 | Every session               |
-| Skills / agent       | 0        | Only when invoked           |
+| Component | Tokens | When |
+| --- | --- | --- |
+| SessionStart hook | ~360 | Every session |
+| Secret scanner | 0 | Shell script, no token cost |
+| Rules (if installed) | ~500-800 | Every session |
+| Skills / agent | 0 | Only when invoked |
 
-**Total always-on cost:** ~300 tokens (without rules) / ~1,100 tokens (with rules)
+**Total always-on cost:** ~360 tokens (without rules) / ~1,160 tokens (with rules)
 
 ---
 
@@ -201,38 +314,39 @@ claude-governance/
 │   └── marketplace.json         # Marketplace listing schema
 ├── hooks/
 │   ├── hooks.json               # Hook registrations (SessionStart, PreToolUse)
-│   ├── session-start.sh         # Governance context injection
-│   └── secret-scanner.sh        # Secret pattern blocker (25+ patterns, PII warnings)
+│   ├── session-start.sh         # Three Loops + Consequence Override injection
+│   └── secret-scanner.sh        # 25 BLOCK + 3 WARN patterns, dual-loop
 ├── skills/
-│   ├── governance-check/SKILL.md  # Quick fitness function runner
-│   ├── create-adr/SKILL.md       # ADR generator
+│   ├── governance-check/SKILL.md  # 31 checks across 3 categories
+│   ├── create-adr/SKILL.md       # ADR generator with governance loop
 │   ├── spec-driven-dev/SKILL.md   # Spec-first development workflow
-│   └── governance-setup/SKILL.md  # Project initialization wizard
+│   └── governance-setup/SKILL.md  # 6-step project initialization
 ├── agents/
-│   └── governance-reviewer.md   # Deep compliance review agent
+│   └── governance-reviewer.md   # Deep compliance review with severity grading
 ├── examples/
 │   ├── rules/                   # 5 rules for ~/.claude/rules/
+│   ├── DATA-CLASSIFICATION.md.example  # Data sensitivity template [DSGAI07]
+│   ├── mcp-security-checklist.md       # MCP/plugin security [DSGAI06]
+│   ├── shadow-ai-policy.md            # Shadow AI policy [DSGAI03]
+│   ├── ai-supply-chain-checklist.md   # AI artifact vetting [DSGAI04]
 │   ├── DOMAIN.md.example              # Domain model template
-│   ├── DATA-CLASSIFICATION.md.example # Data sensitivity template [DSGAI07]
-│   ├── mcp-security-checklist.md      # MCP/plugin security checklist [DSGAI06]
-│   ├── shadow-ai-policy.md            # Shadow AI policy template [DSGAI03]
-│   ├── ai-supply-chain-checklist.md   # AI artifact vetting checklist [DSGAI04]
-│   ├── adr-template.md                # ADR template with governance fields
+│   ├── adr-template.md                # ADR template
 │   └── project-claude-md.example
-├── scripts/
-│   ├── install-rules.sh         # Rules installer with backup
-│   └── bump-version.sh          # Version sync across 3 files
 ├── docs/
 │   ├── adr/
 │   │   ├── ADR-001-adopt-governance-framework.md
 │   │   └── ADR-002-consequence-based-authorization.md
 │   └── compliance/
-│       └── DSGAI-MAPPING.md       # OWASP DSGAI control mapping
+│       └── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
+├── scripts/
+│   ├── install-rules.sh         # Rules installer with backup
+│   └── bump-version.sh          # Version sync across 3 files
 ├── tests/
-│   ├── validate-plugin.sh       # Structural integrity (50+ checks)
-│   └── test-secret-scanner.sh   # Pattern-by-pattern scanner tests
+│   ├── validate-plugin.sh       # Structural integrity (53+ checks)
+│   ├── test-secret-scanner.sh   # 34 pattern-by-pattern tests
+│   └── test-release-qa.sh       # 162 QA checks (8-Habit verified)
 ├── .github/workflows/
-│   └── validate.yml             # CI/CD pipeline
+│   └── validate.yml             # CI: structural + scanner tests
 ├── CHANGELOG.md
 ├── README.md
 └── LICENSE
@@ -243,13 +357,16 @@ claude-governance/
 ## Development
 
 ```bash
-# Run structural validation (48 checks)
+# Structural validation (53+ checks)
 bash tests/validate-plugin.sh --skip-install-check
 
-# Run with install verification
-bash tests/validate-plugin.sh
+# Scanner pattern tests (34 tests)
+bash tests/test-secret-scanner.sh
 
-# Bump version (updates plugin.json, marketplace.json, CHANGELOG.md)
+# Full QA suite (162 checks, 8-Habit verified)
+bash tests/test-release-qa.sh
+
+# Bump version
 bash scripts/bump-version.sh X.Y.Z
 ```
 
@@ -259,10 +376,11 @@ bash scripts/bump-version.sh X.Y.Z
 
 Areas where help is welcome:
 
-- Fitness function examples for other tech stacks
-- Language-specific secret patterns (Ruby, PHP, Java, C#)
+- Fitness function examples for other tech stacks (Ruby, PHP, Java, C#)
+- Language-specific secret and PII patterns
 - Translations (i18n for session-start context)
 - Real-world case studies and governance templates
+- OWASP DSGAI Tier 3 controls (DSGAI05, DSGAI12, DSGAI13)
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
@@ -274,8 +392,9 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 - **ADRs** — _Lightweight Architecture Decision Records_ (ThoughtWorks Technology Radar)
 - **Spec-Driven Dev** — Derived from Design-by-Contract (Meyer, 1986)
 - **Three Loops** — Human-AI interaction model for autonomous systems
+- **Consequence-Based Auth** — See [ADR-002](docs/adr/ADR-002-consequence-based-authorization.md) — extends Three Loops with blast radius
 - **OWASP DSGAI** — _GenAI Data Security Risks and Mitigations_ v1.0 (March 2026) — [genai.owasp.org](https://genai.owasp.org)
-- **Compliance Mapping** — See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md)
+- **Compliance Mapping** — See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md) for 11 controls
 
 ---
 
