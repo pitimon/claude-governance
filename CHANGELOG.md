@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-05-02
+
+### Fixed
+
+- Secret scanner false-positive on prose mentioning `Authorization` or `mongodb` keywords (closes #23). `${ENTRY%%:*}` (longest-suffix) cut at the first colon, degrading two pattern regexes — `mongodb(\+srv)?://[^\s]+` and `Authorization:\s*Bearer\s+...{20,}` — to their bare keyword prefixes at runtime, blocking documentation that merely mentioned the words. Replaced with `${ENTRY%:*}` (shortest-suffix) at both BLOCK and WARN loop sites.
+
+### Added
+
+- 2 regression tests in `tests/test-secret-scanner.sh` for the keyword-in-prose case (Auth header, DB brand) — total 36 tests (was 34).
+- Convention comment in `hooks/secret-scanner.sh` noting that pattern descriptions must not contain `:`.
+
 ## [3.0.0] - 2026-03-24
 
 ### Added
