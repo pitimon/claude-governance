@@ -1,6 +1,6 @@
 {
   "name": "claude-governance",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Complete governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, ADR system, and Three Loops decision model",
   "author": {
     "name": "pitimon",
@@ -22,6 +22,8 @@
     "code-quality",
     "pre-commit-checks",
     "domain-model",
-    "guardrails"
+    "guardrails",
+    "eu-ai-act",
+    "compliance"
   ]
 }

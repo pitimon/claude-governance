@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-05-02
+
+### Added
+
+- EU AI Act compliance toolkit migrated from `pitimon/8-habit-ai-dev` v2.3.0 (closes #21):
+  - `/eu-ai-act-check` skill — 9-obligation tiered checklist (25 MUST + 27 SHOULD + 8 COULD) covering Articles 9-15 of Regulation (EU) 2024/1689, with scope pre-flight (`--scope`) for Annex III high-risk classification and EU deployment confirmation
+  - `docs/research/eu-ai-act-obligations.md` — primary-source verified Articles 9-15 quotes (verbatim from 8-habit-ai-dev)
+  - `docs/compliance/EU-AI-ACT-MAPPING.md` — Article-to-skill mapping guide rewritten for the governance plugin's skill set; routes 4 of 9 obligations to governance skills (1, 2, 3, 5, 6, 8, 9) and explicitly marks 2 as External (4 record-keeping, 7 accuracy — runtime concerns)
+  - `docs/adr/ADR-003-eu-ai-act-compliance-toolkit.md` — migration provenance + plugin boundary rationale (8-habit = workflow discipline, claude-governance = compliance enforcement + framework mappings)
+- Bidirectional cross-references between EU AI Act Article 15 ¶5 and OWASP DSGAI04/DSGAI11 controls (added to both `EU-AI-ACT-MAPPING.md` Obligation 9 and `DSGAI-MAPPING.md` new "EU AI Act Cross-References" section)
+- 8 new structural validation checks in `tests/validate-plugin.sh` (53 → 64) covering reference.md, research file, mapping file, ADR-003 existence; tier integrity (≥25 MUST items); NOT LEGAL ADVICE disclaimer; all 9 obligation sections; DSGAI cross-reference section
+- 2 new keywords in `plugin.json`: `eu-ai-act`, `compliance` (13 → 15)
+
+### Changed
+
+- Skill references inside the migrated EU AI Act toolkit rewritten from 8-habit-ai-dev's workflow skills (`/security-check`, `/design`, `/build-brief`, `/monitor-setup`, `/reflect`, `/review-ai`, `/requirements`, `/ai-dev-log`) to claude-governance equivalents (`/governance-check`, `/spec-driven-dev`, `/create-adr`, `governance-reviewer` agent) per ADR-003 plugin boundary
+- Covey/8-habit framing dropped from the migrated skill (no `Habit: H1+H8` markers; "Step 3 — Habit Checkpoint" → "Step 3 — Conscience Check"); the value preserved is the 9-obligation checklist + scope pre-flight + verified quotes, not the habit framing
+- `EU-AI-ACT-MAPPING.md` end-to-end example now shows the two-plugin flow (workflow discipline via 8-habit-ai-dev + compliance enforcement via claude-governance)
+
+### Coordination
+
+- `pitimon/8-habit-ai-dev` v2.3.1 (separate follow-up release, same maintainer) will delete the migrated files (`skills/eu-ai-act-check/`, `docs/research/eu-ai-act-obligations.md`, `guides/eu-ai-act-mapping.md`) and add ADR-006 mirroring this migration. Hard rule: do NOT merge that PR before this v3.1.0 ships.
+
+### Deferred
+
+- README.md tagline + EU AI Act badge — deferred to a doc-only follow-up PR. The local Markdown formatter rewrites all tables on every Edit, producing 140+ lines of unrelated noise. Same precedent as #23.
+
 ## [3.0.1] - 2026-05-02
 
 ### Fixed

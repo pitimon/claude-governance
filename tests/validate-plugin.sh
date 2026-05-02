@@ -138,7 +138,7 @@ fi
 section "3. File Integrity"
 
 # 3.1 Required SKILL.md files
-EXPECTED_SKILLS=("spec-driven-dev" "governance-check" "create-adr" "governance-setup")
+EXPECTED_SKILLS=("spec-driven-dev" "governance-check" "create-adr" "governance-setup" "eu-ai-act-check")
 
 for skill in "${EXPECTED_SKILLS[@]}"; do
   skill_file="$SKILLS_DIR/$skill/SKILL.md"
@@ -246,6 +246,69 @@ if [[ -f "$PLUGIN_DIR/hooks/hooks.json" ]]; then
   fail ".claude-plugin/hooks/hooks.json exists (should only be in hooks/)"
 else
   pass "No duplicate hooks.json in .claude-plugin/"
+fi
+
+# ============================================================
+# 3.11 EU AI Act Compliance Toolkit (v3.1.0 migration from 8-habit-ai-dev)
+# ============================================================
+section "3.11 EU AI Act Compliance Toolkit"
+
+# Skill files (SKILL.md is checked above via EXPECTED_SKILLS)
+if [[ -f "$SKILLS_DIR/eu-ai-act-check/reference.md" ]]; then
+  pass "skills/eu-ai-act-check/reference.md exists"
+else
+  fail "skills/eu-ai-act-check/reference.md not found"
+fi
+
+# Research file (primary-source verified quotes)
+if [[ -f "$REPO_ROOT/docs/research/eu-ai-act-obligations.md" ]]; then
+  pass "docs/research/eu-ai-act-obligations.md exists"
+else
+  fail "docs/research/eu-ai-act-obligations.md not found"
+fi
+
+# Compliance mapping
+if [[ -f "$REPO_ROOT/docs/compliance/EU-AI-ACT-MAPPING.md" ]]; then
+  pass "docs/compliance/EU-AI-ACT-MAPPING.md exists"
+else
+  fail "docs/compliance/EU-AI-ACT-MAPPING.md not found"
+fi
+
+# Migration ADR
+if [[ -f "$REPO_ROOT/docs/adr/ADR-003-eu-ai-act-compliance-toolkit.md" ]]; then
+  pass "docs/adr/ADR-003 exists"
+else
+  fail "docs/adr/ADR-003 not found"
+fi
+
+# Tier integrity — must have ≥25 MUST items in reference.md (per regulation derivation)
+must_count=$(grep -c '^- \[ \] \*\*\[MUST\]\*\*' "$SKILLS_DIR/eu-ai-act-check/reference.md" 2>/dev/null || echo "0")
+if [[ "$must_count" -ge 25 ]]; then
+  pass "reference.md has $must_count MUST items (>= 25)"
+else
+  fail "reference.md has $must_count MUST items (expected >= 25)"
+fi
+
+# NOT LEGAL ADVICE disclaimer present in SKILL.md
+if grep -qi "NOT LEGAL ADVICE" "$SKILLS_DIR/eu-ai-act-check/SKILL.md"; then
+  pass "SKILL.md contains NOT LEGAL ADVICE disclaimer"
+else
+  fail "SKILL.md missing NOT LEGAL ADVICE disclaimer"
+fi
+
+# All 9 obligations present in reference.md
+obligation_count=$(grep -c '^## Obligation' "$SKILLS_DIR/eu-ai-act-check/reference.md" 2>/dev/null || echo "0")
+if [[ "$obligation_count" -eq 9 ]]; then
+  pass "reference.md has all 9 obligation sections"
+else
+  fail "reference.md has $obligation_count obligation sections (expected 9)"
+fi
+
+# DSGAI-MAPPING.md has the EU AI Act cross-reference section (bidirectional traceability)
+if grep -q "EU AI Act Cross-References" "$REPO_ROOT/docs/compliance/DSGAI-MAPPING.md"; then
+  pass "DSGAI-MAPPING.md has EU AI Act cross-reference section"
+else
+  fail "DSGAI-MAPPING.md missing EU AI Act cross-reference section"
 fi
 
 # ============================================================

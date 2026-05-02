@@ -96,6 +96,20 @@
 | DSGAI12  | Unsafe Natural-Language Data Gateways      | Deferred to `/genai-data-scan`    |
 | DSGAI13  | Vector Store Platform Data Security        | Deferred to `/agentic-scan`       |
 
+## EU AI Act Cross-References
+
+EU AI Act Article 15 ¶5 names exactly 5 AI-specific attack categories that align with DSGAI controls. Use this table for bidirectional traceability when generating evidence for both frameworks:
+
+| EU AI Act Art. 15 ¶5 attack              | DSGAI control      | Reference in this plugin                                                    |
+| ---------------------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| Data poisoning (training data)           | DSGAI04            | `examples/ai-supply-chain-checklist.md`, `skills/governance-check/SKILL.md` |
+| Model poisoning (pre-trained components) | DSGAI04            | same                                                                        |
+| Adversarial examples / model evasion     | DSGAI04 (extended) | same                                                                        |
+| Confidentiality attacks                  | DSGAI11            | `skills/governance-check/SKILL.md`, `agents/governance-reviewer.md`         |
+| Model flaws                              | DSGAI04 + DSGAI11  | combined                                                                    |
+
+See `docs/compliance/EU-AI-ACT-MAPPING.md` for the full Article-to-skill mapping (all 9 obligations, Articles 9-15). The bidirectional pointer in `EU-AI-ACT-MAPPING.md` Obligation 9 (Cybersecurity) points back to this section.
+
 ## Complementary Tools
 
 - **devsecops-ai-team** plugin: `/genai-data-scan` (DSGAI full scan), `/agentic-scan` (Agentic Top 10), `/mcp-scan` (MCP security)
