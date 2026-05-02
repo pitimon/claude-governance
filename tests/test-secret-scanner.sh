@@ -98,6 +98,13 @@ assert_allowed "Short string" "x = 42"
 assert_allowed "Comment with sk-" "# sk- prefix is used for API keys"
 assert_allowed "Empty-ish content" "const x = true"
 
+# Regression for #23 — bare keywords in prose must not be blocked.
+# Before fix, BLOCK_PATTERNS split on first ':' degraded the auth and DB
+# regexes to their bare keyword prefixes, blocking documentation that merely
+# mentioned the words. After fix, only the full payload forms match.
+assert_allowed "Auth keyword in prose" "# Doc mentions the Authorization header"
+assert_allowed "DB keyword in prose"   "We use mongodb as our document store."
+
 # ============================================================
 # Edge cases
 # ============================================================
