@@ -71,8 +71,10 @@ BLOCK_PATTERNS=(
   'client_secret\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded client secret'
 )
 
+# Convention: DESC must not contain a colon — splitter uses last-colon delimiter
+# so regexes containing colons (URI schemes, header names) reconstruct correctly.
 for ENTRY in "${BLOCK_PATTERNS[@]}"; do
-  PATTERN="${ENTRY%%:*}"
+  PATTERN="${ENTRY%:*}"
   DESC="${ENTRY##*:}"
 
   if echo "$CONTENT" | grep -qE -- "$PATTERN"; then
@@ -98,7 +100,7 @@ WARN_PATTERNS=(
 PII_WARNED=false
 
 for ENTRY in "${WARN_PATTERNS[@]}"; do
-  PATTERN="${ENTRY%%:*}"
+  PATTERN="${ENTRY%:*}"
   DESC="${ENTRY##*:}"
 
   if echo "$CONTENT" | grep -qE -- "$PATTERN"; then
