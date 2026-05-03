@@ -138,7 +138,7 @@ fi
 section "3. File Integrity"
 
 # 3.1 Required SKILL.md files
-EXPECTED_SKILLS=("spec-driven-dev" "governance-check" "create-adr" "governance-setup" "eu-ai-act-check")
+EXPECTED_SKILLS=("spec-driven-dev" "governance-check" "create-adr" "governance-setup" "eu-ai-act-check" "iso-42001-check")
 
 for skill in "${EXPECTED_SKILLS[@]}"; do
   skill_file="$SKILLS_DIR/$skill/SKILL.md"
@@ -309,6 +309,90 @@ if grep -q "EU AI Act Cross-References" "$REPO_ROOT/docs/compliance/DSGAI-MAPPIN
   pass "DSGAI-MAPPING.md has EU AI Act cross-reference section"
 else
   fail "DSGAI-MAPPING.md missing EU AI Act cross-reference section"
+fi
+
+# ============================================================
+# 3.12 ISO/IEC 42001:2023 AIMS Compliance Toolkit (v3.2.0, issue #27)
+# ============================================================
+section "3.12 ISO/IEC 42001 AIMS Compliance Toolkit"
+
+# Skill files (SKILL.md is checked above via EXPECTED_SKILLS)
+if [[ -f "$SKILLS_DIR/iso-42001-check/reference.md" ]]; then
+  pass "skills/iso-42001-check/reference.md exists"
+else
+  fail "skills/iso-42001-check/reference.md not found"
+fi
+
+# Compliance mapping
+if [[ -f "$REPO_ROOT/docs/compliance/ISO-42001-MAPPING.md" ]]; then
+  pass "docs/compliance/ISO-42001-MAPPING.md exists"
+else
+  fail "docs/compliance/ISO-42001-MAPPING.md not found"
+fi
+
+# Framework selection ADR
+if [[ -f "$REPO_ROOT/docs/adr/ADR-004-iso-42001-framework-selection.md" ]]; then
+  pass "docs/adr/ADR-004 exists"
+else
+  fail "docs/adr/ADR-004 not found"
+fi
+
+# Structural gate 1: all 9 Annex A clause headings present (A.2 through A.10)
+clause_count=$(grep -c '^## Clause A\.' "$SKILLS_DIR/iso-42001-check/reference.md" 2>/dev/null || echo "0")
+if [[ "$clause_count" -eq 9 ]]; then
+  pass "reference.md has all 9 Annex A clause headings (A.2-A.10)"
+else
+  fail "reference.md has $clause_count clause headings (expected 9)"
+fi
+
+# Structural gate 2: every clause has at least one MUST item (no clause is all-SHOULD/COULD)
+# Extract clause sections, check each for at least one MUST. Uses awk to process per-clause blocks.
+clauses_without_must=$(awk '
+  /^## Clause A\./ { if (current && !has_must) print current; current=$0; has_must=0; next }
+  /^- \[ \] \*\*\[MUST\]\*\*/ { has_must=1 }
+  END { if (current && !has_must) print current }
+' "$SKILLS_DIR/iso-42001-check/reference.md")
+if [[ -z "$clauses_without_must" ]]; then
+  pass "every clause (A.2-A.10) has >=1 MUST item"
+else
+  fail "clauses missing MUST items: $clauses_without_must"
+fi
+
+# Structural gate 3: MUST items collectively cite >=5 distinct existing skills/checks
+# Scope the search to MUST item lines + the "Mapped skills" line preceding each clause section.
+# We grep for known skill/anchor names that should appear in MUST contexts.
+skill_anchors=("spec-driven-dev" "governance-check" "governance-reviewer" "create-adr" "ADR-001" "ADR-002")
+distinct_skills_found=0
+for anchor in "${skill_anchors[@]}"; do
+  if grep -q "$anchor" "$SKILLS_DIR/iso-42001-check/reference.md"; then
+    distinct_skills_found=$((distinct_skills_found + 1))
+  fi
+done
+if [[ "$distinct_skills_found" -ge 5 ]]; then
+  pass "reference.md cites $distinct_skills_found distinct existing skills/checks (>=5 required)"
+else
+  fail "reference.md cites only $distinct_skills_found distinct skills/checks (expected >=5)"
+fi
+
+# Disclaimer present in SKILL.md, reference.md, and mapping doc
+disclaimer_files=("$SKILLS_DIR/iso-42001-check/SKILL.md" "$SKILLS_DIR/iso-42001-check/reference.md" "$REPO_ROOT/docs/compliance/ISO-42001-MAPPING.md")
+disclaimer_missing=()
+for f in "${disclaimer_files[@]}"; do
+  if ! grep -q "NOT A CERTIFICATION GUARANTEE" "$f" 2>/dev/null; then
+    disclaimer_missing+=("$(basename "$f")")
+  fi
+done
+if [[ ${#disclaimer_missing[@]} -eq 0 ]]; then
+  pass "NOT A CERTIFICATION GUARANTEE disclaimer present in SKILL.md, reference.md, mapping doc"
+else
+  fail "NOT A CERTIFICATION GUARANTEE missing in: ${disclaimer_missing[*]}"
+fi
+
+# DSGAI-MAPPING.md has the ISO 42001 cross-reference section (bidirectional traceability)
+if grep -q "ISO 42001 Cross-References" "$REPO_ROOT/docs/compliance/DSGAI-MAPPING.md"; then
+  pass "DSGAI-MAPPING.md has ISO 42001 cross-reference section"
+else
+  fail "DSGAI-MAPPING.md missing ISO 42001 cross-reference section"
 fi
 
 # ============================================================
