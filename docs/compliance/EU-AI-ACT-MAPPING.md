@@ -343,6 +343,7 @@ For these, you need:
 - **Article 14 (Human Oversight)**: AI Act Service Desk
 - **Internal research**: `docs/research/eu-ai-act-obligations.md`
 - **DSGAI cross-reference**: `docs/compliance/DSGAI-MAPPING.md`
+- **ISO 42001 cross-reference**: `docs/compliance/ISO-42001-MAPPING.md` — substantial overlap on Articles 9-15 ↔ Annex A clauses A.5/A.7/A.6/A.9. Article 9 (Risk Management) ↔ A.5 (Assessing Impacts); Article 10 (Data Governance) ↔ A.7 (Data for AI Systems); Article 11 (Technical Documentation) ↔ A.6.2.7 + A.6.2.3; Article 14 (Human Oversight) ↔ A.9.2 (Three Loops satisfies both). Use ISO 42001 evidence to satisfy EU AI Act obligations and vice versa — a single `data-governance.md` can satisfy Article 10 + A.7.4 + A.7.5 + DSGAI04. See `ISO-42001-MAPPING.md` "EU AI Act Cross-References" section for the full bidirectional table.
 - **Migration provenance**: `docs/adr/ADR-003-eu-ai-act-compliance-toolkit.md`
 
 ---

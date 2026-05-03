@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-05-03
+
+### Added
+
+- ISO/IEC 42001:2023 AI Management System (AIMS) compliance toolkit (closes #27):
+  - `/iso-42001-check` skill — 38-control tiered checklist (17 MUST + 15 SHOULD + 6 COULD) covering Annex A clauses A.2-A.10, with mode-selection scope-check (`--scope`) supporting four postures (certification / self-attestation / internal-alignment / customer-requirement) and conditional A.10 tier promotion based on third-party AI sourcing
+  - `skills/iso-42001-check/reference.md` — full Annex A control list with Tier × Status orthogonal axes (3×3 matrix), tier heuristic table, and per-clause checklist
+  - `docs/compliance/ISO-42001-MAPPING.md` — coverage scorecard (12 ENFORCED / 20 EVIDENCE-ONLY / 6 GAP, 0 MUST+GAP), per-clause status tables, Standards Family section (ISO 23894 / 5338 / 22989 / 38507 as informative cross-refs), end-to-end self-attestation example, EU AI Act + DSGAI cross-references
+  - `docs/adr/ADR-004-iso-42001-framework-selection.md` — On-the-Loop framework selection rationale; structural validator gates rejected numeric MUST-count circularity; A.10 conditional-MUST mechanism documented
+  - `tests/validate-plugin.sh` section 3.12 — structural fitness function (file presence, 9 clause headings, every clause has ≥1 MUST, MUST items cite ≥5 distinct skills, NOT A CERTIFICATION GUARANTEE disclaimer present, DSGAI cross-ref section present)
+  - Bidirectional cross-references added to `docs/compliance/DSGAI-MAPPING.md` and `docs/compliance/EU-AI-ACT-MAPPING.md`
+
+### Notes
+
+- ISO/IEC 42001:2023 is paywalled (~CHF 174). All control titles are paraphrased from secondary sources (ISMS.online + Cyberzoni, verified 2026-05-03); no `docs/research/` analogue ships and no verbatim ISO 42001 text appears in this plugin
+- "NOT A CERTIFICATION GUARANTEE" disclaimer (not "NOT LEGAL ADVICE") reflects ISO 42001's voluntary, certifiable nature — distinct from EU AI Act's regulatory enforceability
+- ISO 23894 (risk management), 5338 (lifecycle), 22989 (vocabulary), 38507 (board governance) are informative cross-references only; standalone skills will be added if user demand emerges per ADR-004 Review Trigger
+
+### Deferred
+
+- README.md updates (add `/iso-42001-check` + `/eu-ai-act-check` to On-Demand commands table, add Compliance Frameworks subsection) — deferred to a doc-only follow-up PR. Same precedent as v3.1.0 and #23: the local Markdown formatter rewrites all tables on every Edit, producing 138+ lines of unrelated noise.
+
 ## [3.1.0] - 2026-05-02
 
 ### Added

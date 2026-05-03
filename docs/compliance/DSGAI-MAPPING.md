@@ -110,6 +110,19 @@ EU AI Act Article 15 ¶5 names exactly 5 AI-specific attack categories that alig
 
 See `docs/compliance/EU-AI-ACT-MAPPING.md` for the full Article-to-skill mapping (all 9 obligations, Articles 9-15). The bidirectional pointer in `EU-AI-ACT-MAPPING.md` Obligation 9 (Cybersecurity) points back to this section.
 
+## ISO 42001 Cross-References
+
+ISO/IEC 42001:2023 Annex A controls overlap with several DSGAI controls. Use this table for bidirectional traceability when generating evidence for both frameworks (per ADR-004):
+
+| DSGAI control                              | ISO 42001 Annex A clause                                             | Reference                                                                                       |
+| ------------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| DSGAI03 (Shadow AI)                        | A.4.4 (Tooling resources)                                            | `examples/shadow-ai-policy.md`                                                                  |
+| DSGAI04 (Data, Model & Artifact Poisoning) | A.7.4 (Quality of data), A.7.5 (Data provenance), A.10.3 (Suppliers) | `skills/governance-check/SKILL.md` (pre-commit #10-12), `examples/ai-supply-chain-checklist.md` |
+| DSGAI07 (Data Governance & Classification) | A.4.3 (Data resources), A.7.2 (Data for development)                 | `examples/DATA-CLASSIFICATION.md.example`                                                       |
+| DSGAI19 (Human-in-the-Loop)                | A.9.2 (Processes for responsible use)                                | `docs/adr/ADR-002-consequence-based-authorization.md`                                           |
+
+See `docs/compliance/ISO-42001-MAPPING.md` for the full Annex A coverage scorecard (38 controls across 9 clauses) and the bidirectional pointer back from ISO 42001 to DSGAI.
+
 ## Complementary Tools
 
 - **devsecops-ai-team** plugin: `/genai-data-scan` (DSGAI full scan), `/agentic-scan` (Agentic Top 10), `/mcp-scan` (MCP security)
