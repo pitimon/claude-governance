@@ -346,6 +346,19 @@ For these, you need:
 - **ISO 42001 cross-reference**: `docs/compliance/ISO-42001-MAPPING.md` — substantial overlap on Articles 9-15 ↔ Annex A clauses A.5/A.7/A.6/A.9. Article 9 (Risk Management) ↔ A.5 (Assessing Impacts); Article 10 (Data Governance) ↔ A.7 (Data for AI Systems); Article 11 (Technical Documentation) ↔ A.6.2.7 + A.6.2.3; Article 14 (Human Oversight) ↔ A.9.2 (Three Loops satisfies both). Use ISO 42001 evidence to satisfy EU AI Act obligations and vice versa — a single `data-governance.md` can satisfy Article 10 + A.7.4 + A.7.5 + DSGAI04. See `ISO-42001-MAPPING.md` "EU AI Act Cross-References" section for the full bidirectional table.
 - **Migration provenance**: `docs/adr/ADR-003-eu-ai-act-compliance-toolkit.md`
 
+## NIST AI RMF Cross-References
+
+NIST AI RMF 1.0 functions overlap with EU AI Act Articles 9-15 substantially (~60-70% foundation per GLACIS community analysis at `https://www.glacis.io/guide-nist-ai-rmf-vs-eu-ai-act`). Note: NIST is voluntary US federal guidance; EU AI Act is regulatory. NIST coverage is a **starting point** for EU AI Act compliance, not a substitute. Specific EU-only gaps not addressed by NIST: prohibited AI practices (Art. 5), CE marking + conformity assessment (Art. 43, 48-49), EU AI database registration (Art. 71), 15-day serious incident reporting (Art. 73), explicit fines (€35M or 7% global revenue per Art. 99), authorized EU representative (Art. 22).
+
+| NIST Function | EU AI Act Article(s) |
+|---------------|----------------------|
+| **GOVERN**    | Art. 16, 17, 26(6), 4 |
+| **MAP**       | Art. 6, 9(1), Annex III, 10, 14, 13, 9(2), 27 |
+| **MEASURE**   | Art. 15(1), Annex IV(2)(e-f), 9(6-7), 10(2)(f), 10(5), 43, 31-39 |
+| **MANAGE**    | Art. 9(4), 9(2)(b), 20, 18, 12, 73, 72 |
+
+See `docs/compliance/NIST-AI-RMF-MAPPING.md` for the canonical 3-way table (NIST function vs ISO 42001 clause vs EU AI Act article), the EU-only gap list with mitigation pointers, and the cited Microsoft-authored crosswalk PDF SHA-256 verification snippet. ADR-005 documents why NIST AI RMF lands as a cross-reference doc rather than a standalone skill.
+
 ---
 
 ## Next Steps
