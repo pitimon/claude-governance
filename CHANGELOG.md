@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-05-03
+
+### Added
+
+- NIST AI RMF 1.0 compliance toolkit (closes #29):
+  - `docs/compliance/NIST-AI-RMF-MAPPING.md` — first-class cross-reference doc with 4-row function-level mapping (NIST Govern/Map/Measure/Manage ↔ ISO 42001 Annex A clauses ↔ EU AI Act Articles), cited Microsoft-authored ISO 42001 crosswalk URL with SHA-256 verification snippet (link-rot mitigation), EU AI Act gap list (Art. 5/22/43/48-49/71/73/99), NIST AI 600-1 (GenAI Profile) ↔ DSGAI cross-references, 8-habit-ai-dev pointers for runtime concerns, NIST.AI.100-1 DOI as permanent authoritative anchor
+  - `docs/adr/ADR-005-nist-ai-rmf-cross-reference-doc.md` — On-the-Loop framework selection rationale; structural fitness function (`validate-plugin.sh` section 3.13); multi-trigger review (customer ask OR NIST 1.1+ OR regulator mandate OR third standalone skill request)
+  - `docs/research/nist-ai-rmf-compliance-brief.md` — Deep + Compare research (verified via `8-habit-ai-dev:research-verifier` agent: 6/7 claims VERIFIED)
+  - `docs/research/nist-ai-rmf-toolkit-prd.md` — 10 EARS criteria, 6 success criteria, 5 risks, 4-commit sequencing constraint
+  - Bidirectional cross-references added to `docs/compliance/ISO-42001-MAPPING.md` and `docs/compliance/EU-AI-ACT-MAPPING.md` (tailored 2-column tables per host audience)
+  - `tests/validate-plugin.sh` section 3.13 — 4 new structural gates (NIST mapping exists + ADR-005 exists + ISO mapping cites NIST mapping by path + EU AI Act mapping cites NIST mapping by path)
+
+### Fixed
+
+- Secret scanner OpenAI/Stripe regex false-positive (issue #29 sub-scope): the `sk-` BLOCK pattern matched 22-char compounds inside English phrases (specifically the canonical NIST AI RMF home-page URL slug), blocking writes that cited that URL. Discovered while writing the v3.3.0 NIST AI RMF research brief and PRD (the brief itself had to use a heredoc workaround twice). Two-stage check now: (a) base regex with left word boundary `(^|[^A-Za-z])sk-...` rejects matches preceded by a letter, (b) matched text must contain at least one digit (real OpenAI/Stripe/Anthropic keys are alphanumeric with digits by construction). The 3 affected patterns (`sk-`, `sk-proj-`, `sk-ant-`) moved from `BLOCK_PATTERNS` to a new `DIGIT_REQUIRED_BLOCK_PATTERNS` array with its own loop. Other BLOCK patterns (Bearer, JWT, GitHub PAT, AWS, etc.) retain original single-stage behavior. Test suite: 36 → 40 tests, 40 PASS / 0 FAIL. The v3.0.x 20-char length floor is preserved.
+
+### Notes
+
+- This release is the first `claude-governance` compliance framework that lands as a **cross-reference doc instead of a standalone skill** — see ADR-005 for the demand-first rationale (extends ADR-004's pattern). When a third standalone skill is requested, the consolidated lesson `~/.claude/lessons/2026-05-03-claude-governance-compliance-toolkit-arc.md` action item #3 commits to extracting the meta-pattern into a `compliance-framework-template/` skeleton at that point
+- "NOT A CERTIFICATION GUARANTEE" disclaimer (consistent with ISO 42001 voluntary-not-regulatory precedent from v3.2.0)
+- Microsoft-authored ISO 42001 crosswalk URL cited as canonical mapping (no re-derivation of 70+ subcategory mappings)
+
+### Deferred
+
+- Standalone `/nist-ai-rmf-check` skill — Tier 2 deferred per ADR-005 demand-first pattern
+- `compliance-framework-template/` skeleton extraction — Tier 2 deferred until a third standalone skill is requested (NIST as cross-ref doc doesn't count as a skill data point)
+- ISO/IEC 42005:2024 (AI impact assessment) — Tier 3
+- README.md updates (add `/iso-42001-check` + `/eu-ai-act-check` On-Demand commands + Compliance Frameworks subsection + new NIST cross-ref doc row) — same precedent as v3.1.0 + v3.2.0 (formatter rewrites all tables, 138+ lines noise). Combined doc-only follow-up PR
+
 ## [3.2.0] - 2026-05-03
 
 ### Added

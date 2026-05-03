@@ -209,6 +209,19 @@ OWASP DSGAI controls operationalize several ISO 42001 controls with concrete cod
 
 See `docs/compliance/DSGAI-MAPPING.md` "ISO 42001 Cross-References" section for the bidirectional pointer back from DSGAI to 42001.
 
+## NIST AI RMF Cross-References
+
+NIST AI RMF 1.0 functions overlap substantially with ISO 42001 Annex A clauses per the official Microsoft-authored crosswalk hosted on the NIST AI Resource Center (`https://airc.nist.gov/docs/NIST_AI_RMF_to_ISO_IEC_42001_Crosswalk.pdf`). Use this table for evidence reuse when bridging NIST RMF artifacts to ISO 42001 audit packages:
+
+| NIST Function | ISO 42001 Annex A clause(s) |
+|---------------|------------------------------|
+| **GOVERN**    | A.2 (Policies), A.3 (Internal Org), A.10 (Third-Party) |
+| **MAP**       | A.5 (Assessing Impacts), A.7 (Data) |
+| **MEASURE**   | A.6.2.4 (V&V), A.6.2.6 (Operation/Monitoring) |
+| **MANAGE**    | A.6.2.5 (Deployment), A.8 (Information for Interested Parties), A.9 (Use) |
+
+See `docs/compliance/NIST-AI-RMF-MAPPING.md` for the canonical 3-way table (NIST function vs ISO 42001 clause vs EU AI Act article), the cited Microsoft-authored crosswalk PDF SHA-256 verification snippet, and the EU AI Act gap list. ADR-005 documents why NIST AI RMF lands as a cross-reference doc rather than a standalone skill.
+
 ## Complementary Tools
 
 - **`pitimon/8-habit-ai-dev`** plugin: `/deploy-guide` (A.6.2.5), `/monitor-setup` (A.6.2.6), `/ai-dev-log` (A.8.3), `/review-ai` (A.6.2.4 augmentation)

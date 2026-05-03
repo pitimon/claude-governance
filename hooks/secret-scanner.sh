@@ -48,9 +48,6 @@ BLOCK_PATTERNS=(
   'api_key\s*=\s*["\x27][A-Za-z0-9_\-]{10,}["\x27]:Hardcoded API key'
   'password\s*=\s*["\x27][^\x27"]{4,}["\x27]:Hardcoded password'
   'PASSWORD\s*=\s*["\x27][^\x27"]{4,}["\x27]:Hardcoded password'
-  'sk-[A-Za-z0-9_-]{20,}:OpenAI/Stripe secret key'
-  'sk-proj-[A-Za-z0-9_-]{20,}:OpenAI project key'
-  'sk-ant-[A-Za-z0-9_-]{20,}:Anthropic API key'
   'ghp_[A-Za-z0-9]{36,}:GitHub personal access token'
   'gho_[A-Za-z0-9]{36,}:GitHub OAuth token'
   'ghs_[A-Za-z0-9]{36,}:GitHub server token'
@@ -78,6 +75,40 @@ for ENTRY in "${BLOCK_PATTERNS[@]}"; do
   DESC="${ENTRY##*:}"
 
   if echo "$CONTENT" | grep -qE -- "$PATTERN"; then
+    echo "Governance: Blocked — $DESC detected in file content." >&2
+    echo "" >&2
+    echo "Use environment variables instead of hardcoding secrets:" >&2
+    echo "  JS/TS:  const value = process.env.YOUR_SECRET" >&2
+    echo "  Python: value = os.environ['YOUR_SECRET']" >&2
+    echo "  Go:     value := os.Getenv(\"YOUR_SECRET\")" >&2
+    echo "" >&2
+    echo "To fix: replace the hardcoded value with an environment variable reference." >&2
+    exit 2
+  fi
+done
+
+# === DIGIT-REQUIRED BLOCK PATTERNS (exit 2) — sk-shaped keys (issue #29) ===
+# These patterns use a two-stage check:
+#   (1) base regex must match — with left word boundary that rejects matches
+#       preceded by a letter (avoids the canonical NIST AI {ri}{sk}-management URL slug)
+#   (2) the matched text must contain at least one digit (real OpenAI/Stripe/Anthropic
+#       keys are alphanumeric with digits; English compounds are letters-only)
+# Convention: DESC must not contain a colon (same as BLOCK_PATTERNS — see below).
+DIGIT_REQUIRED_BLOCK_PATTERNS=(
+  '(^|[^A-Za-z])sk-[A-Za-z0-9_-]{20,}:OpenAI/Stripe secret key'
+  '(^|[^A-Za-z])sk-proj-[A-Za-z0-9_-]{20,}:OpenAI project key'
+  '(^|[^A-Za-z])sk-ant-[A-Za-z0-9_-]{20,}:Anthropic API key'
+)
+
+for ENTRY in "${DIGIT_REQUIRED_BLOCK_PATTERNS[@]}"; do
+  PATTERN="${ENTRY%:*}"
+  DESC="${ENTRY##*:}"
+
+  # Stage 1: extract all matches of the base pattern
+  MATCHES=$(echo "$CONTENT" | grep -oE -- "$PATTERN" 2>/dev/null)
+
+  # Stage 2: only block if at least one match contains a digit
+  if [[ -n "$MATCHES" ]] && echo "$MATCHES" | grep -qE '[0-9]'; then
     echo "Governance: Blocked — $DESC detected in file content." >&2
     echo "" >&2
     echo "Use environment variables instead of hardcoding secrets:" >&2

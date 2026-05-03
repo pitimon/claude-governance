@@ -396,6 +396,39 @@ else
 fi
 
 # ============================================================
+# 3.13 NIST AI RMF Cross-Reference Toolkit (v3.3.0, issue #29)
+# ============================================================
+section "3.13 NIST AI RMF Cross-Reference Toolkit"
+
+# Gate 1: NIST mapping doc exists
+if [[ -f "$REPO_ROOT/docs/compliance/NIST-AI-RMF-MAPPING.md" ]]; then
+  pass "docs/compliance/NIST-AI-RMF-MAPPING.md exists"
+else
+  fail "docs/compliance/NIST-AI-RMF-MAPPING.md not found"
+fi
+
+# Gate 2: ADR-005 exists
+if [[ -f "$REPO_ROOT/docs/adr/ADR-005-nist-ai-rmf-cross-reference-doc.md" ]]; then
+  pass "docs/adr/ADR-005 exists"
+else
+  fail "docs/adr/ADR-005 not found"
+fi
+
+# Gate 3: ISO 42001 mapping cites NIST mapping by path (bidirectional cross-ref)
+if grep -q "NIST-AI-RMF-MAPPING.md" "$REPO_ROOT/docs/compliance/ISO-42001-MAPPING.md" 2>/dev/null; then
+  pass "ISO-42001-MAPPING.md cites NIST-AI-RMF-MAPPING.md by path"
+else
+  fail "ISO-42001-MAPPING.md missing back-reference to NIST-AI-RMF-MAPPING.md"
+fi
+
+# Gate 4: EU AI Act mapping cites NIST mapping by path (bidirectional cross-ref)
+if grep -q "NIST-AI-RMF-MAPPING.md" "$REPO_ROOT/docs/compliance/EU-AI-ACT-MAPPING.md" 2>/dev/null; then
+  pass "EU-AI-ACT-MAPPING.md cites NIST-AI-RMF-MAPPING.md by path"
+else
+  fail "EU-AI-ACT-MAPPING.md missing back-reference to NIST-AI-RMF-MAPPING.md"
+fi
+
+# ============================================================
 # 4. Keyword & Description Coverage
 # ============================================================
 section "4. Keyword & Description Coverage"

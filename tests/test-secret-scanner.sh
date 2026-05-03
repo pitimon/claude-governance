@@ -56,8 +56,8 @@ printf "\n\033[1;36m[BLOCK patterns — must exit 2]\033[0m\n"
 
 assert_blocked "API_KEY assignment" 'API_KEY = \"abcdefghij1234567890\"'
 assert_blocked "password assignment" 'password = \"mysecret\"'
-assert_blocked "sk- OpenAI key" "sk-abcdefghijklmnopqrstuvwxyz"
-assert_blocked "sk-proj- key" "sk-proj-abcdefghijklmnopqrstuvwx"
+assert_blocked "sk- OpenAI key" "sk-abc123def456ghi789jkl012"
+assert_blocked "sk-proj- key" "sk-proj-abc123def456ghi789jkl012"
 assert_blocked "sk-ant- Anthropic key" "sk-ant-api03-abcdefghijklmnopqrst"
 assert_blocked "ghp_ GitHub PAT" "ghp_abcdefghijklmnopqrstuvwxyz1234567890"
 assert_blocked "gho_ GitHub OAuth" "gho_abcdefghijklmnopqrstuvwxyz1234567890"
@@ -77,6 +77,11 @@ assert_blocked "Authorization header" "Authorization: Bearer eyJhbGciOiJIUzI1NiI
 assert_blocked "oauth_token" 'oauth_token = \"abcdefghij1234567890\"'
 assert_blocked "refresh_token" 'refresh_token = \"abcdefghij1234567890\"'
 assert_blocked "client_secret" 'client_secret = \"abcdefghij1234567890\"'
+
+# Regression for #29 — real OpenAI/Stripe key with digits must still BLOCK
+# (verifies the v3.3.0 word-boundary + digit-requirement fix does not weaken
+# real-key detection)
+assert_blocked "sk-proj real key with digits" "sk-proj-abc123def456ghi789jkl012"
 
 # ============================================================
 # WARN tests — PII patterns (exit 0 + stderr WARNING)
@@ -104,6 +109,15 @@ assert_allowed "Empty-ish content" "const x = true"
 # mentioned the words. After fix, only the full payload forms match.
 assert_allowed "Auth keyword in prose" "# Doc mentions the Authorization header"
 assert_allowed "DB keyword in prose"   "We use mongodb as our document store."
+
+# Regression for #29 — three "must not block" cases that force the v3.3.0
+# scanner to be strict in three independent dimensions:
+# (a) word boundary — sk- preceded by a letter (the NIST AI RMF URL slug case)
+# (b) length floor  — sk-N is too short to be a real key (4 chars < 20)
+# (c) digit requirement — 20 letters with no digit is not a real key shape
+assert_allowed "NIST URL slug (word boundary)" "see nist.gov/itl/ai-risk-management-framework for details"
+assert_allowed "sk- short with digit (length floor)" "the value sk-9 is too short to be a key"
+assert_allowed "sk- 20 letters no digit (digit requirement)" "sk-aaaaaaaaaaaaaaaaaaaa is letters only"
 
 # ============================================================
 # Edge cases
