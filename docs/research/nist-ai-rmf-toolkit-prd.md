@@ -54,8 +54,8 @@ Single PR = single review pass; commit-by-commit ordering preserves bisectabilit
 
 ## Success Criteria
 
-1. `validate-plugin.sh --skip-install-check` reports **PASS: 78** (75 existing + 3 new gates: file-exists for NIST mapping, cross-ref section present in ISO mapping, cross-ref section present in EU AI Act mapping). FAIL count remains 0.
-2. `tests/test-secret-scanner.sh` reports **38 tests PASS** (36 existing + 2 new: NIST URL slug NOT blocked; real OpenAI-style key with digits still blocked). Reproducibility: a fresh write of the canonical NIST AI RMF home-page URL to a test file completes without hook interception.
+1. `validate-plugin.sh --skip-install-check` reports **PASS: 79** (75 existing + 4 new gates: file-exists for NIST mapping, ADR-005 exists, ISO mapping cites NIST mapping by path, EU AI Act mapping cites NIST mapping by path — implementation went stricter than the spec's "3 new gates" floor by adding the ADR-005 existence check). FAIL count remains 0.
+2. `tests/test-secret-scanner.sh` reports **40 tests PASS** (36 existing + 4 new — implementation went stricter than the spec's "≥2 new" floor: NIST URL slug NOT blocked; real OpenAI-style key with digits still blocked). Reproducibility: a fresh write of the canonical NIST AI RMF home-page URL to a test file completes without hook interception.
 3. Bidirectional cross-references resolve in both directions: `NIST-AI-RMF-MAPPING.md` cites both `ISO-42001-MAPPING.md` and `EU-AI-ACT-MAPPING.md` by full path; both existing mapping docs cite `NIST-AI-RMF-MAPPING.md` back.
 4. ADR-005 follows the established ADR shape (Status / Date / Context / Decision / Consequences / Governance / Provenance) and uses Three Loops = On-the-Loop with a structural fitness function citing `validate-plugin.sh` section 3.13.
 5. `governance-reviewer` agent run on the diff reports zero CRITICAL, zero HIGH findings; MEDIUM findings (if any) addressed before merge.
@@ -76,7 +76,7 @@ Single PR = single review pass; commit-by-commit ordering preserves bisectabilit
 
 2. **[Ubiquitous]** The system shall include `docs/adr/ADR-005-nist-ai-rmf-cross-reference-doc.md` documenting the cross-reference-first selection rationale, Three Loops classification (On-the-Loop), and a structural fitness function pointing at `tests/validate-plugin.sh` section 3.13.
 
-3. **[Event-driven]** When a maintainer runs `bash tests/validate-plugin.sh --skip-install-check`, the system shall report exactly 78 PASS, 0 FAIL (3 new structural gates added in section 3.13: NIST mapping file exists, ISO mapping has NIST cross-ref section, EU AI Act mapping has NIST cross-ref section).
+3. **[Event-driven]** When a maintainer runs `bash tests/validate-plugin.sh --skip-install-check`, the system shall report 79 PASS, 0 FAIL (4 new structural gates added in section 3.13: NIST mapping file exists, ADR-005 exists, ISO mapping cites NIST mapping by path, EU AI Act mapping cites NIST mapping by path — 4 gates rather than the original 3-gate spec).
 
 4. **[Event-driven]** When a maintainer or user writes the canonical NIST AI RMF home-page URL to any file via Edit/Write/MultiEdit, the system shall NOT block the write with a secret-scanner OpenAI/Stripe key alert.
 

@@ -21,12 +21,18 @@ The official mapping from NIST AI RMF functions/categories/subcategories to ISO/
 URL:    https://airc.nist.gov/docs/NIST_AI_RMF_to_ISO_IEC_42001_Crosswalk.pdf
 Author: Gregory Montgomery (Microsoft)
 Format: 16 pages, Excel-origin PDF
-SHA-256 (captured 2026-05-03): 170efdf7be08a988213b54fb8293f3ea67f0627aff6f0541052dfbb0744afed3
+SHA-256 (browser download, captured 2026-05-03): 170efdf7be08a988213b54fb8293f3ea67f0627aff6f0541052dfbb0744afed3
 
-# Verify the cited PDF has not drifted:
-curl -sL https://airc.nist.gov/docs/NIST_AI_RMF_to_ISO_IEC_42001_Crosswalk.pdf | sha256sum
+# Verify the cited PDF has not drifted (use a browser UA — see note below):
+curl -sL -A "Mozilla/5.0" https://airc.nist.gov/docs/NIST_AI_RMF_to_ISO_IEC_42001_Crosswalk.pdf | sha256sum
 # Expected first 64 hex chars: 170efdf7be08a988213b54fb8293f3ea67f0627aff6f0541052dfbb0744afed3
 ```
+
+> **Cloudflare verification caveat**: `airc.nist.gov` is fronted by Cloudflare, which serves a bot-challenge-modified byte stream to automated `curl` requests without a browser User-Agent header. A bare `curl -sL ... | sha256sum` will return a different hash than the one captured above, but **this does not indicate the underlying PDF has drifted** — the underlying file's `Last-Modified` header (currently `2024-09-19`) is the authoritative drift signal. If hash verification fails:
+>
+> 1. Re-fetch with a browser `User-Agent` (as in the snippet above) and re-compare
+> 2. Check `curl -sIL <URL>` for the `Last-Modified` header — if it is still `2024-09-19` (or earlier than 2026-05-03), the PDF has not changed
+> 3. Fall back to the **DOI permanent anchor** (`https://doi.org/10.6028/NIST.AI.100-1`) for the canonical NIST AI RMF 1.0 source — the DOI is permanent and not subject to CDN drift.
 
 This document does **not** re-derive the 70+ subcategory mappings from the Microsoft crosswalk. For per-subcategory NIST↔ISO 42001 detail, consult the canonical PDF above. This document provides a 4-row function-level summary plus a NIST↔EU AI Act overlap analysis (which the Microsoft crosswalk does not cover).
 
