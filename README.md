@@ -386,6 +386,16 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
+## Companion Plugins
+
+`claude-governance` works **fully standalone**. For projects that combine it with `8-habit-ai-dev` (workflow method) and/or `devsecops-ai-team` (operational tooling), the canonical integration guide lives in `8-habit-ai-dev` to prevent SSOT drift across version bumps:
+
+→ **[docs/INTEGRATION.md](docs/INTEGRATION.md)** (local stub) — links to the canonical guide and notes governance-specific points (Three Loops + ADR-002, EU AI Act canonical role per ADR-003).
+
+Tested against `8-habit-ai-dev` 2.15.0 and `devsecops-ai-team` 10.10.0.
+
+---
+
 ## References
 
 - **Fitness Functions** — _Building Evolutionary Architectures_ (Ford, Parsons, Kua — O'Reilly)
