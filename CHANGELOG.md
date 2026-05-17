@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-05-17
+
+### Added
+
+- **ADR-006: Hook Design Principle — Distinguish Write-new vs Edit-tracked Operations** (closes [#34](https://github.com/pitimon/claude-governance/issues/34)) — forward-looking architectural guidance for any PreToolUse hook in this plugin (or downstream user configurations) that targets file operations. Hooks MUST distinguish create-new from edit-tracked before deciding to block, using one of two mechanical tests:
+  1. **File existence**: target path does not exist on disk → create-new
+  2. **Git-tracked status**: `git ls-files --error-unmatch <path>` exits non-zero → create-new
+
+  Includes a reference bash implementation pattern for a `.md` create-new blocker that allows edit-tracked unconditionally.
+
+  Motivating use case: [`pitimon/8-habit-ai-dev#197`](https://github.com/pitimon/8-habit-ai-dev/issues/197) item 4 — Adopter #2 friction on the v2.15.9 spec-digest-pattern guide. A naive `.md`-blocker hook conflates new-file creation with legitimate updates to tracked files (SPEC.md §4 save-point updates, CHANGELOG entries, current-state.md revisions, ADR drafts).
+
+  **Existing hook audit**: `hooks/secret-scanner.sh` does NOT need this distinction — it scans content regardless of file state because secret-leak risk applies equally to new and existing files. ADR-006 is forward-looking guidance, not a corrective change.
+
+### Pattern
+
+**Preventive design guidance, not reactive patching.** A friction shape was surfaced in a downstream plugin's adopter report. The architectural fix lives in the hook layer (this plugin) per the documented plugin boundary. ADR-006 records the principle before any concrete `.md`-targeting hook ships, so future hook authors have a documented constraint to work against and adopters have a published architectural principle to point to in upstream issues.
+
 ## [3.3.0] - 2026-05-03
 
 ### Added
