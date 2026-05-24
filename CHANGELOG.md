@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.6] - 2026-05-25
+
+### Changed
+
+- **Institutionalize the ETCLOVG README↔canonical mirror-sync rule** (issue [#46](https://github.com/pitimon/claude-governance/issues/46), PR [#47](https://github.com/pitimon/claude-governance/pull/47)). v3.3.5 PR [#44](https://github.com/pitimon/claude-governance/pull/44) inlined the 7-layer ETCLOVG verdict table in `README.md` for adopter discoverability, but the canonical map's Maintenance section did not acknowledge the mirror — so a future ADR that shifted a layer's `Status` could update the canonical table and silently leave the README copy stale (same doc-drift failure class that v3.3.5 PR [#43](https://github.com/pitimon/claude-governance/pull/43) just fixed). Two surgical hunks (3 lines total, additive only):
+  - `docs/architecture/etclovg-coverage.md` Maintenance section gains a **"README mirror sync"** bullet declaring this doc the **single source of truth** and requiring any layer-`Status` change to update the README table in the same PR.
+  - `README.md` § "Agent Harness Coverage (ETCLOVG)" carries an HTML comment above the section pointing back to the canonical SSOT and citing #46.
+
+  No table row / count / verdict moved. Both tables remain consistent (Strong=1 G, Partial=3 C/L/V, None=1 O, OOS=2 E/T). This is a fitness-function-style expectation (per the canonical map's "not enforced by a CI check" language); a CI row-count assertion is held back per ADR-014 friction-first discipline (in `8-habit-ai-dev`) — promote to "ship" only on a second drift incident.
+
+### Verification
+
+- `bash tests/validate-plugin.sh --skip-install-check` → PASS 79 / FAIL 0 / SKIP 1 (CI signal intact).
+- `bash tests/test-secret-scanner.sh` → PASS 40 / FAIL 0.
+- `bash tests/test-release-qa.sh` → PASS 162 / FAIL 0 / WARN 0.
+
+No production code, skill, hook, or runtime change — docs-only patch release for drift prevention. Consistent with the v3.3.2 / v3.3.3 / v3.3.5 docs-only release precedent.
+
 ## [3.3.5] - 2026-05-25
 
 ### Changed
