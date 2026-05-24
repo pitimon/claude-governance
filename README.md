@@ -292,6 +292,34 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 
 → **[docs/architecture/etclovg-coverage.md](docs/architecture/etclovg-coverage.md)** — ETCLOVG 7-layer taxonomy coverage map (Agent Harness Engineering). Anchor for future scope-expansion decisions: `G` strong, `V/L/C` partial, `O` none, `E/T` out-of-scope by charter / plugin boundary.
 
+### Agent Harness Coverage (ETCLOVG)
+
+`Agent = Model + Harness`. The **ETCLOVG taxonomy** (Agent Harness Engineering, 2026) defines 7 layers that wrap a model to make it a reliable autonomous agent: **E**xecution, **T**ooling, **C**ontext+Memory, **L**ifecycle, **O**bservability, **V**erification, **G**overnance. This plugin's per-layer coverage:
+
+| Layer                             |        Status         | What ships today                                                                                                                                                                                                                                     | Gap / Why not                                                                     |
+| --------------------------------- | :-------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **E** — Execution Environment     |     `OOS-charter`     | —                                                                                                                                                                                                                                                    | "Skills are read-only guidance" — charter-amendment ADR required to re-evaluate   |
+| **T** — Tooling (MCP / A2A)       | `OOS-plugin-boundary` | —                                                                                                                                                                                                                                                    | Routed to sibling plugin `pitimon/devsecops-ai-team` (plugin boundary)            |
+| **C** — Context & Memory          |       `Partial`       | `hooks/session-start.sh` (~360 tokens/session — Progressive Disclosure); skills lazy-load on `/command`                                                                                                                                              | No Compaction or Context Resets                                                   |
+| **L** — Lifecycle & Orchestration |       `Partial`       | Three Loops + Consequence Override (ADR-002) — autonomy classification with irreversible-op gating                                                                                                                                                   | No multi-agent orchestration or Planner-Generator-Evaluator structural separation |
+| **O** — Observability             |        `None`         | —                                                                                                                                                                                                                                                    | No trace / telemetry / SLA metrics — awaiting first-person friction signal        |
+| **V** — Verification              |       `Partial`       | 31 fitness functions (pre-commit / pre-PR / architecture), `governance-reviewer` agent, `validate-plugin.sh` (80 checks)                                                                                                                             | "Verify Before You Fix" sandbox gate not yet codified                             |
+| **G** — Governance & Security     |     **`Strong`**      | (1) Three Loops + Consequence Override (ADR-002) · (2) `secret-scanner.sh` 25 BLOCK + 3 WARN · (3) `governance-reviewer` agent · (4) 31 governance checks · (5) Compliance mappings: EU AI Act / ISO 42001 / NIST AI RMF / OWASP DSGAI (11 controls) | — primary focus                                                                   |
+
+**Coverage summary**:
+
+| Status                | Count | Layers  |
+| --------------------- | ----: | ------- |
+| `Strong`              |     1 | G       |
+| `Partial`             |     3 | C, L, V |
+| `None`                |     1 | O       |
+| `OOS-charter`         |     1 | E       |
+| `OOS-plugin-boundary` |     1 | T       |
+
+> **Friction-first**: `Partial` is not an invitation to expand. Per ADR-014 in `8-habit-ai-dev`, pattern attractiveness alone is not a shipping criterion — a first-person friction case (issue, lesson, post-mortem) must be cited before any `Partial` → `Strong` move.
+>
+> **Adopter shorthand**: use `claude-governance` for **G strong** + **V/L/C partial**. For **E (sandbox)** or **T (MCP)**, pair with [`pitimon/devsecops-ai-team`](https://github.com/pitimon/devsecops-ai-team).
+
 ---
 
 ## Token Budget
