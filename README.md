@@ -21,13 +21,13 @@
 
 AI-assisted development is fast — but ungoverned AI is a liability.
 
-| Without Governance | With claude-governance |
-| --- | --- |
-| `sk-ant-api03-xxx` committed to git | Blocked before it reaches the filesystem |
-| Junior dev deploys to production via AI | Three Loops classifies it as In-the-Loop — human decides |
-| Prompt context leaks PII to observability | Telemetry hygiene check flags `log(prompt)` patterns |
-| Team uses 5 different AI tools with no policy | Shadow AI policy template — approved tools, data rules |
-| "Who decided to use MongoDB?" — no one knows | ADR system records every architecture decision |
+| Without Governance                            | With claude-governance                                   |
+| --------------------------------------------- | -------------------------------------------------------- |
+| `sk-ant-api03-xxx` committed to git           | Blocked before it reaches the filesystem                 |
+| Junior dev deploys to production via AI       | Three Loops classifies it as In-the-Loop — human decides |
+| Prompt context leaks PII to observability     | Telemetry hygiene check flags `log(prompt)` patterns     |
+| Team uses 5 different AI tools with no policy | Shadow AI policy template — approved tools, data rules   |
+| "Who decided to use MongoDB?" — no one knows  | ADR system records every architecture decision           |
 
 **Zero dependencies.** Zero build steps. Zero runtime overhead. Just Markdown skills and shell scripts that run inside Claude Code.
 
@@ -137,46 +137,46 @@ You: /governance-setup
 
 ### Always-On (Hooks)
 
-| Hook | Trigger | What It Does |
-| --- | --- | --- |
-| **Governance context** | Session start | Injects Three Loops + Consequence Override (~360 tokens) |
-| **Secret scanner** | Every `Edit`/`Write` | 25 BLOCK patterns (secrets) + 3 WARN patterns (PII) |
+| Hook                   | Trigger              | What It Does                                             |
+| ---------------------- | -------------------- | -------------------------------------------------------- |
+| **Governance context** | Session start        | Injects Three Loops + Consequence Override (~360 tokens) |
+| **Secret scanner**     | Every `Edit`/`Write` | 25 BLOCK patterns (secrets) + 3 WARN patterns (PII)      |
 
 ### On-Demand (Skills & Agent)
 
-| Command | When to Use | Example |
-| --- | --- | --- |
-| `/governance-check` | Before commit/push | `/governance-check pre-commit` |
-| `/create-adr` | After architecture decision | `/create-adr "Adopt PostgreSQL over MongoDB"` |
-| `/spec-driven-dev` | Before feature implementation | `/spec-driven-dev` → writes spec.md |
-| `/governance-setup` | New project initialization | Creates DOMAIN.md, ADRs, rules |
-| `governance-reviewer` | Before PR (auto-triggered) | Deep multi-file review with severity grading |
+| Command               | When to Use                   | Example                                       |
+| --------------------- | ----------------------------- | --------------------------------------------- |
+| `/governance-check`   | Before commit/push            | `/governance-check pre-commit`                |
+| `/create-adr`         | After architecture decision   | `/create-adr "Adopt PostgreSQL over MongoDB"` |
+| `/spec-driven-dev`    | Before feature implementation | `/spec-driven-dev` → writes spec.md           |
+| `/governance-setup`   | New project initialization    | Creates DOMAIN.md, ADRs, rules                |
+| `governance-reviewer` | Before PR (auto-triggered)    | Deep multi-file review with severity grading  |
 
 ### 31 Governance Checks
 
-| Category | Count | Key Checks |
-| --- | --- | --- |
-| **Pre-Commit** | 14 | Secrets, input validation, file size, debug prints, AI model artifacts, unsafe deserialization, telemetry hygiene |
-| **Pre-PR** | 5 | Conventional commits, DOMAIN.md sync, test coverage >= 80% |
-| **Architecture** | 12 | Service boundaries, auth coverage, plugin/MCP security, session isolation, consequence safeguards |
+| Category         | Count | Key Checks                                                                                                        |
+| ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------- |
+| **Pre-Commit**   | 14    | Secrets, input validation, file size, debug prints, AI model artifacts, unsafe deserialization, telemetry hygiene |
+| **Pre-PR**       | 5     | Conventional commits, DOMAIN.md sync, test coverage >= 80%                                                        |
+| **Architecture** | 12    | Service boundaries, auth coverage, plugin/MCP security, session isolation, consequence safeguards                 |
 
 ### OWASP DSGAI Compliance — 11 Controls
 
 Mapped to [OWASP GenAI Data Security](https://genai.owasp.org) v1.0 (March 2026):
 
-| Control | Risk | What We Do |
-| --- | --- | --- |
-| DSGAI01 | Sensitive Data Leakage | PII WARN patterns (email, SSN, credit card) |
-| DSGAI02 | Agent Credential Exposure | BLOCK patterns for OAuth, Bearer, refresh tokens |
-| DSGAI03 | Shadow AI | Policy template with approved alternatives |
-| DSGAI04 | Data/Model Poisoning | Model file detection, unsafe deserialization, dependency pinning |
-| DSGAI06 | Plugin/Tool Data Exchange | MCP security checklist, least-privilege checks |
-| DSGAI07 | Data Classification | 4-level classification template with AI/LLM data flows |
-| DSGAI08 | Compliance Violations | This compliance mapping + `[DSGAI##]` tags in all outputs |
-| DSGAI11 | Cross-Context Bleed | Session isolation, multi-tenant separation checks |
-| DSGAI14 | Telemetry Leakage | Flags `log(prompt)` patterns in production code |
-| DSGAI15 | Over-Broad Context | Context minimization checks, token budget enforcement |
-| DSGAI19 | Human-in-the-Loop Gaps | Consequence-based auth — irreversible ops always In-the-Loop |
+| Control | Risk                      | What We Do                                                       |
+| ------- | ------------------------- | ---------------------------------------------------------------- |
+| DSGAI01 | Sensitive Data Leakage    | PII WARN patterns (email, SSN, credit card)                      |
+| DSGAI02 | Agent Credential Exposure | BLOCK patterns for OAuth, Bearer, refresh tokens                 |
+| DSGAI03 | Shadow AI                 | Policy template with approved alternatives                       |
+| DSGAI04 | Data/Model Poisoning      | Model file detection, unsafe deserialization, dependency pinning |
+| DSGAI06 | Plugin/Tool Data Exchange | MCP security checklist, least-privilege checks                   |
+| DSGAI07 | Data Classification       | 4-level classification template with AI/LLM data flows           |
+| DSGAI08 | Compliance Violations     | This compliance mapping + `[DSGAI##]` tags in all outputs        |
+| DSGAI11 | Cross-Context Bleed       | Session isolation, multi-tenant separation checks                |
+| DSGAI14 | Telemetry Leakage         | Flags `log(prompt)` patterns in production code                  |
+| DSGAI15 | Over-Broad Context        | Context minimization checks, token budget enforcement            |
+| DSGAI19 | Human-in-the-Loop Gaps    | Consequence-based auth — irreversible ops always In-the-Loop     |
 
 See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md) for the full control-by-control mapping.
 
@@ -184,33 +184,33 @@ See [docs/compliance/DSGAI-MAPPING.md](docs/compliance/DSGAI-MAPPING.md) for the
 
 Governance checks detect the project's language and apply stack-specific rules:
 
-| Check | JS/TS | Python | Go | Rust |
-| --- | --- | --- | --- | --- |
-| Debug prints | `console.log` | `print()` | `fmt.Println` | `println!` |
-| Validation | Zod, joi, yup | pydantic, marshmallow | go-validator | serde, validator |
-| Dangerous | `eval()`, `innerHTML` | `eval()`, `exec()`, `pickle.loads()` | `unsafe.Pointer` | `unsafe` blocks |
-| Detection | `package.json` | `pyproject.toml` | `go.mod` | `Cargo.toml` |
+| Check        | JS/TS                 | Python                               | Go               | Rust             |
+| ------------ | --------------------- | ------------------------------------ | ---------------- | ---------------- |
+| Debug prints | `console.log`         | `print()`                            | `fmt.Println`    | `println!`       |
+| Validation   | Zod, joi, yup         | pydantic, marshmallow                | go-validator     | serde, validator |
+| Dangerous    | `eval()`, `innerHTML` | `eval()`, `exec()`, `pickle.loads()` | `unsafe.Pointer` | `unsafe` blocks  |
+| Detection    | `package.json`        | `pyproject.toml`                     | `go.mod`         | `Cargo.toml`     |
 
 ### Ready-to-Use Templates
 
-| Template | Purpose | Reference |
-| --- | --- | --- |
-| `DATA-CLASSIFICATION.md.example` | 4-level data sensitivity with AI/LLM data flows | DSGAI07 |
-| `mcp-security-checklist.md` | Plugin/MCP vetting before installation | DSGAI06 |
-| `shadow-ai-policy.md` | Approved AI tools, data rules, exceptions | DSGAI03 |
-| `ai-supply-chain-checklist.md` | Model vetting, dependency pinning, safe alternatives | DSGAI04 |
-| `DOMAIN.md.example` | Entity definitions, invariants, API contracts | — |
-| `adr-template.md` | Architecture Decision Record with governance loop | — |
+| Template                         | Purpose                                              | Reference |
+| -------------------------------- | ---------------------------------------------------- | --------- |
+| `DATA-CLASSIFICATION.md.example` | 4-level data sensitivity with AI/LLM data flows      | DSGAI07   |
+| `mcp-security-checklist.md`      | Plugin/MCP vetting before installation               | DSGAI06   |
+| `shadow-ai-policy.md`            | Approved AI tools, data rules, exceptions            | DSGAI03   |
+| `ai-supply-chain-checklist.md`   | Model vetting, dependency pinning, safe alternatives | DSGAI04   |
+| `DOMAIN.md.example`              | Entity definitions, invariants, API contracts        | —         |
+| `adr-template.md`                | Architecture Decision Record with governance loop    | —         |
 
 ### Rules for `~/.claude/rules/`
 
-| Rule | Focus |
-| --- | --- |
-| `governance.md` | Fitness functions: pre-implementation, pre-commit, pre-PR, architecture |
-| `security.md` | Secret management, agent/plugin security, PII, telemetry, session isolation |
-| `coding-style.md` | Immutability, file size limits, error handling |
-| `git-workflow.md` | Conventional commits, PR workflow, TDD |
-| `testing.md` | 80% coverage minimum, unit/integration/E2E |
+| Rule              | Focus                                                                       |
+| ----------------- | --------------------------------------------------------------------------- |
+| `governance.md`   | Fitness functions: pre-implementation, pre-commit, pre-PR, architecture     |
+| `security.md`     | Secret management, agent/plugin security, PII, telemetry, session isolation |
+| `coding-style.md` | Immutability, file size limits, error handling                              |
+| `git-workflow.md` | Conventional commits, PR workflow, TDD                                      |
+| `testing.md`      | 80% coverage minimum, unit/integration/E2E                                  |
 
 ---
 
@@ -236,12 +236,12 @@ Consequence
 
 Automated governance checks — "unit tests for architecture":
 
-| Stage | What Gets Checked |
-| --- | --- |
-| **Pre-Implementation** | Spec exists, domain invariants identified, autonomy classified, irreversible ops flagged |
-| **Pre-Commit** | 14 checks: secrets, PII, validation, file size, functions, immutability, debug prints, AI artifacts, deserialization, deps, telemetry |
-| **Pre-PR** | 5 checks: conventional commits, DOMAIN.md, breaking changes, test coverage, TODO context |
-| **Architecture** | 12 checks: service boundaries, auth, rate limiting, plugin/MCP, context minimization, session isolation, consequence safeguards |
+| Stage                  | What Gets Checked                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pre-Implementation** | Spec exists, domain invariants identified, autonomy classified, irreversible ops flagged                                              |
+| **Pre-Commit**         | 14 checks: secrets, PII, validation, file size, functions, immutability, debug prints, AI artifacts, deserialization, deps, telemetry |
+| **Pre-PR**             | 5 checks: conventional commits, DOMAIN.md, breaking changes, test coverage, TODO context                                              |
+| **Architecture**       | 12 checks: service boundaries, auth, rate limiting, plugin/MCP, context minimization, session isolation, consequence safeguards       |
 
 ### Spec-Driven Development
 
@@ -280,7 +280,7 @@ graph TB
 
     subgraph "Compliance"
         D1["DSGAI-MAPPING.md<br/>11 OWASP controls"]
-        D2["ADR-001 + ADR-002"]
+        D2["ADR Catalog<br/>(6 records)"]
     end
 
     H1 -->|~360 tokens| SESSION["Every Session"]
@@ -294,12 +294,12 @@ graph TB
 
 ## Token Budget
 
-| Component | Tokens | When |
-| --- | --- | --- |
-| SessionStart hook | ~360 | Every session |
-| Secret scanner | 0 | Shell script, no token cost |
-| Rules (if installed) | ~500-800 | Every session |
-| Skills / agent | 0 | Only when invoked |
+| Component            | Tokens   | When                        |
+| -------------------- | -------- | --------------------------- |
+| SessionStart hook    | ~360     | Every session               |
+| Secret scanner       | 0        | Shell script, no token cost |
+| Rules (if installed) | ~500-800 | Every session               |
+| Skills / agent       | 0        | Only when invoked           |
 
 **Total always-on cost:** ~360 tokens (without rules) / ~1,160 tokens (with rules)
 
@@ -335,7 +335,11 @@ claude-governance/
 ├── docs/
 │   ├── adr/
 │   │   ├── ADR-001-adopt-governance-framework.md
-│   │   └── ADR-002-consequence-based-authorization.md
+│   │   ├── ADR-002-consequence-based-authorization.md
+│   │   ├── ADR-003-eu-ai-act-compliance-toolkit.md
+│   │   ├── ADR-004-iso-42001-framework-selection.md
+│   │   ├── ADR-005-nist-ai-rmf-cross-reference-doc.md
+│   │   └── ADR-006-hook-design-principle-write-vs-edit.md
 │   └── compliance/
 │       └── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
 ├── scripts/

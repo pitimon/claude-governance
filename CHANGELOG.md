@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.2] - 2026-05-24
+
+### Fixed
+
+- **README ADR inventory drift** (closes [#33](https://github.com/pitimon/claude-governance/issues/33)) — Two README diagrams listed only ADR-001 and ADR-002 while the on-disk catalog had grown to 6 records (ADR-003 EU AI Act, ADR-004 ISO 42001, ADR-005 NIST AI RMF, ADR-006 hook design principle):
+  - **Project Structure tree** (around line 336) now lists all 6 ADR files individually.
+  - **Architecture mermaid** node `D2` (around line 283) now reads `ADR Catalog (6 records)` instead of `ADR-001 + ADR-002` — generic label future-proofs the diagram against the next ADR landing.
+
+  Pre-existing drift caught during the `8-habit-reviewer` audit of PR #32 (2026-05-11); deferred for 14 days. No runtime change, no behavior change for client installs — patch release for README-only fix per the v3.3.1 (`c667f89`) ADR-006 docs-only release precedent.
+
 ## [3.3.1] - 2026-05-17
 
 ### Added
