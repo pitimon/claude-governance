@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.5] - 2026-05-25
+
+### Changed
+
+- **README Architecture diagram**: converted from `mermaid` to **Unicode box-drawing ASCII** ([#43](https://github.com/pitimon/claude-governance/pull/43)). Matches the existing house style at `README.md:L248-255` (the spec-driven-dev diagram already used Unicode box-drawing chars). Same content as the prior mermaid (Always-On / On-Demand / Config + Compliance Anchors), now rendered as static text that displays in any markdown viewer without requiring a mermaid renderer (better for raw README in forks, mirrors, terminal previews, and `gh repo view`).
+- **README drift refresh** to current shipped state ([#43](https://github.com/pitimon/claude-governance/pull/43)):
+  - `tests/validate-plugin.sh` check count: `53+` → `80` (79 PASS + 1 SKIP in CI).
+  - `tests/test-secret-scanner.sh` test count: `34` → `40` tests.
+  - `tests/test-release-qa.sh` clarified as "local-only, not in CI" (per [#40](https://github.com/pitimon/claude-governance/issues/40) / v3.3.4).
+  - Companion plugin tested-against versions: `8-habit-ai-dev` `2.15.0` → **`2.18.6`**, `devsecops-ai-team` `10.10.0` → **`10.14.1`**.
+
+### Added
+
+- **README inline ETCLOVG coverage table** ([#44](https://github.com/pitimon/claude-governance/pull/44)). New `### Agent Harness Coverage (ETCLOVG)` subsection under Architecture surfaces the per-layer verdict directly in the README:
+  - Per-layer table (E / T / C / L / O / V / G) with Status + "What ships today" + Gap / Why not.
+  - Coverage summary: `Strong` × 1 (G), `Partial` × 3 (C, L, V), `None` × 1 (O), `OOS-charter` × 1 (E), `OOS-plugin-boundary` × 1 (T).
+  - Friction-first reminder (ADR-014 in `8-habit-ai-dev`) — `Partial` is not an invitation to expand.
+  - Adopter shorthand — pair with `pitimon/devsecops-ai-team` for **E** (sandbox) or **T** (MCP) coverage.
+
+  Content mirrors `docs/architecture/etclovg-coverage.md` (the canonical SSOT); the detail doc remains authoritative for evidence and maintenance contracts.
+
+### Verification
+
+- `bash tests/validate-plugin.sh --skip-install-check` → PASS 79 / FAIL 0 / SKIP 1 (CI signal intact).
+- `bash tests/test-secret-scanner.sh` → PASS 40 / FAIL 0 (no scanner regression).
+- `bash tests/test-release-qa.sh` → PASS 162 / FAIL 0 / WARN 0 (local QA intact).
+
+No production code, skill, hook, or runtime change — README-only patch release for documentation accuracy and Architecture-diagram portability (precedent: v3.3.2 README-only release, v3.3.3 docs-only release).
+
 ## [3.3.4] - 2026-05-25
 
 ### Fixed
