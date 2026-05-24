@@ -294,6 +294,8 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 
 ### Agent Harness Coverage (ETCLOVG)
 
+<!-- Mirror of docs/architecture/etclovg-coverage.md § Per-layer coverage (single source of truth). Update both in the same PR to avoid drift. See issue #46. -->
+
 `Agent = Model + Harness`. The **ETCLOVG taxonomy** (Agent Harness Engineering, 2026) defines 7 layers that wrap a model to make it a reliable autonomous agent: **E**xecution, **T**ooling, **C**ontext+Memory, **L**ifecycle, **O**bservability, **V**erification, **G**overnance. This plugin's per-layer coverage:
 
 | Layer                             |        Status         | What ships today                                                                                                                                                                                                                                     | Gap / Why not                                                                     |
