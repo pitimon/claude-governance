@@ -258,36 +258,36 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 
 ## Architecture
 
-```mermaid
-graph TB
-    subgraph "Always-On"
-        H1["SessionStart Hook<br/>Three Loops + Consequence"]
-        H2["PreToolUse Hook<br/>Secret Scanner (25 BLOCK + 3 WARN)"]
-    end
+```
+                       ┌────────────────────────────┐
+                       │  Claude Code Session       │
+                       └─────────────┬──────────────┘
+                                     │
+              ┌──────────────────────┼──────────────────────┐
+              ▼                      ▼                      ▼
+       ┌─────────────┐        ┌─────────────┐       ┌──────────────┐
+       │  Always-On  │        │  On-Demand  │       │   Config     │
+       └──────┬──────┘        └──────┬──────┘       └──────┬───────┘
+              │                      │                      │
+   ┌──────────┴──────────┐  ┌────────┴─────────┐  ┌────────┴─────────┐
+   │ SessionStart Hook   │  │ /governance-check│  │ ~/.claude/rules/ │
+   │  Three Loops +      │  │   31 checks /    │  │   5 rule files   │
+   │  Consequence        │  │   3 categories   │  │                  │
+   │  ~360 tokens        │  │                  │  │ Templates        │
+   │                     │  │ /create-adr      │  │   6 examples     │
+   │ PreToolUse Hook     │  │ /spec-driven-dev │  │                  │
+   │  Secret Scanner     │  │ /governance-setup│  │ Always loaded if │
+   │  25 BLOCK + 3 WARN  │  │                  │  │ installed.       │
+   │  blocks file writes │  │ governance-      │  │                  │
+   └─────────────────────┘  │ reviewer agent   │  └──────────────────┘
+                            │   deep + severity│
+                            └──────────────────┘
 
-    subgraph "On-Demand"
-        C1["/governance-check<br/><i>31 checks, 3 categories</i>"]
-        C2["/create-adr"]
-        S1["/spec-driven-dev"]
-        S2["/governance-setup"]
-        A1["governance-reviewer<br/><i>deep review + severity</i>"]
-    end
-
-    subgraph "Configuration"
-        R1["~/.claude/rules/<br/>5 rule files"]
-        T1["Templates<br/>6 examples"]
-    end
-
-    subgraph "Compliance"
-        D1["DSGAI-MAPPING.md<br/>11 OWASP controls"]
-        D2["ADR Catalog<br/>(6 records)"]
-    end
-
-    H1 -->|~360 tokens| SESSION["Every Session"]
-    H2 -->|blocks secrets| WRITES["File Writes"]
-    R1 -->|always loaded| SESSION
-    C1 & A1 -->|on demand| CHECK["Compliance Report"]
-    D1 -->|maps to| CHECK
+   ┌──────────────────────────────────────────────────────────────┐
+   │  Compliance Anchors                                          │
+   │  • DSGAI-MAPPING.md → 11 OWASP DSGAI controls                │
+   │  • docs/adr/        → 6 ADRs (ADR-001 … ADR-006)             │
+   └──────────────────────────────────────────────────────────────┘
 ```
 
 → **[docs/architecture/etclovg-coverage.md](docs/architecture/etclovg-coverage.md)** — ETCLOVG 7-layer taxonomy coverage map (Agent Harness Engineering). Anchor for future scope-expansion decisions: `G` strong, `V/L/C` partial, `O` none, `E/T` out-of-scope by charter / plugin boundary.
@@ -350,9 +350,9 @@ claude-governance/
 │   ├── install-rules.sh         # Rules installer with backup
 │   └── bump-version.sh          # Version sync across 3 files
 ├── tests/
-│   ├── validate-plugin.sh       # Structural integrity (53+ checks)
-│   ├── test-secret-scanner.sh   # 34 pattern-by-pattern tests
-│   └── test-release-qa.sh       # 162 QA checks (8-Habit verified)
+│   ├── validate-plugin.sh       # Structural integrity (80 checks; 79 PASS + 1 SKIP in CI)
+│   ├── test-secret-scanner.sh   # 40 pattern-by-pattern tests
+│   └── test-release-qa.sh       # 162 QA checks (8-Habit verified; local-only, not in CI)
 ├── .github/workflows/
 │   └── validate.yml             # CI: structural + scanner tests
 ├── CHANGELOG.md
@@ -365,13 +365,13 @@ claude-governance/
 ## Development
 
 ```bash
-# Structural validation (53+ checks)
+# Structural validation (79 PASS / 1 SKIP — CI signal)
 bash tests/validate-plugin.sh --skip-install-check
 
-# Scanner pattern tests (34 tests)
+# Scanner pattern tests (40 tests)
 bash tests/test-secret-scanner.sh
 
-# Full QA suite (162 checks, 8-Habit verified)
+# Full QA suite (162 checks, 8-Habit verified; local-only)
 bash tests/test-release-qa.sh
 
 # Bump version
@@ -400,7 +400,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 → **[docs/INTEGRATION.md](docs/INTEGRATION.md)** (local stub) — links to the canonical guide and notes governance-specific points (Three Loops + ADR-002, EU AI Act canonical role per ADR-003).
 
-Tested against `8-habit-ai-dev` 2.15.0 and `devsecops-ai-team` 10.10.0.
+Tested against `8-habit-ai-dev` 2.18.6 and `devsecops-ai-team` 10.14.1.
 
 ---
 
