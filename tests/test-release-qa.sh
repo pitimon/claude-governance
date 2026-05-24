@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# test-release-qa.sh — Comprehensive QA for v2.3.0 + v3.0.0 releases
+# test-release-qa.sh — Local release QA (version-agnostic since #40)
 # Tests: structural integrity, scanner patterns, DSGAI compliance, 8-Habit checks
 # Usage: bash tests/test-release-qa.sh
+# Note: NOT wired into CI; CI runs validate-plugin.sh + test-secret-scanner.sh.
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -37,12 +38,13 @@ file_missing() {
 # ============================================================
 # 1. STRUCTURAL BASELINE
 # ============================================================
-section "1. Structural Baseline (v3.0.0)"
+section "1. Structural Baseline"
 
 # Version
 VER_P=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
 VER_M=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
-[[ "$VER_P" == "3.0.0" ]] && pass "plugin.json version = 3.0.0" || fail "plugin.json version = $VER_P (expected 3.0.0)"
+# Version-agnostic (#40): assert valid semver + sync, not a frozen literal.
+[[ "$VER_P" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && pass "plugin.json version = $VER_P (valid semver)" || fail "plugin.json version = $VER_P (not semver)"
 [[ "$VER_P" == "$VER_M" ]] && pass "Version sync: plugin.json = marketplace.json" || fail "Version mismatch: $VER_P != $VER_M"
 
 # Required files (v2.3.0 + v3.0.0)
@@ -134,7 +136,12 @@ assert_allowed() {
 # Original v2.2.1 patterns (regression)
 assert_blocked "API_KEY" 'API_KEY = \"abcdefghij1234567890\"'
 assert_blocked "password" 'password = \"mysecret\"'
-assert_blocked "sk- OpenAI" "sk-abcdefghijklmnopqrstuvwxyz"
+# v3.3.0 (#29) requires a digit in sk- keys to suppress false positives on
+# letters-only prose. Use a realistic fixture with digits so this stays a
+# valid BLOCK test instead of contradicting the shipped digit-requirement.
+# String split is intentional — keeps the hook's own scanner from flagging
+# this test source while bash still assembles the full key at runtime.
+assert_blocked "sk- OpenAI" "sk-""abc123def456ghi789jkl012"
 assert_blocked "sk-ant- Anthropic (with hyphens, bug #6)" "sk-ant-api03-abcdefghijklmnopqrst"
 assert_blocked "ghp_ GitHub PAT" "ghp_abcdefghijklmnopqrstuvwxyz1234567890"
 assert_blocked "AKIA AWS" "AKIAIOSFODNN7EXAMPLE"
@@ -288,9 +295,9 @@ WARN_P=$(sed -n '/WARN_PATTERNS=/,/^)/p' hooks/secret-scanner.sh | grep -c ":")
 [[ $BLOCK -eq 25 ]] && pass "H3: BLOCK patterns = 25 (unchanged from v2.3.0)" || warn "H3: BLOCK = $BLOCK (expected 25)"
 [[ $WARN_P -eq 3 ]] && pass "H3: WARN patterns = 3 (unchanged from v2.3.0)" || warn "H3: WARN = $WARN_P (expected 3)"
 
-# No new skills
+# Skill count baseline (#40): >=4 instead of frozen -eq 4 (was pinned to v3.0.0).
 SKILL_COUNT=$(ls -d skills/*/SKILL.md 2>/dev/null | wc -l | tr -d ' ')
-[[ "$SKILL_COUNT" -eq 4 ]] && pass "H3: 4 skills (no unnecessary additions)" || warn "H3: $SKILL_COUNT skills"
+[[ "$SKILL_COUNT" -ge 4 ]] && pass "H3: $SKILL_COUNT skills (>=4 baseline)" || warn "H3: $SKILL_COUNT skills (<4 baseline)"
 
 # Tier 3 deferred
 file_has docs/compliance/DSGAI-MAPPING.md "Remaining Gaps" "H3: Tier 3 gaps tracked (not implemented)"
@@ -361,7 +368,7 @@ print(est)
 # ============================================================
 # Summary
 # ============================================================
-printf "\n\033[1m=== QA Summary: v2.3.0 + v3.0.0 ===\033[0m\n"
+printf "\n\033[1m=== QA Summary ===\033[0m\n"
 printf "  \033[32mPASS: %d\033[0m  \033[31mFAIL: %d\033[0m  \033[33mWARN: %d\033[0m\n" "$PASS" "$FAIL" "$WARN"
 
 if [[ "$FAIL" -gt 0 ]]; then
