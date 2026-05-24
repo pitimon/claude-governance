@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.4] - 2026-05-25
+
+### Fixed
+
+- **`tests/test-release-qa.sh`** — refresh stale local QA script (issue #40). The file was pinned to `v3.0.0` and one assertion contradicted the shipped v3.3.0 scanner fix (#29), reporting 2 FAIL / 1 WARN on direct run and disagreeing with `tests/test-secret-scanner.sh:120` about correct scanner behavior. The script is **not** in CI (`.github/workflows/validate.yml` runs only `validate-plugin.sh` + `test-secret-scanner.sh`), so the v3.3.3 release gate was always green — this fix removes a latent trap if the script is ever re-promoted to a gate.
+  - **Version assertion** → regex-based semver check (`^[0-9]+\.[0-9]+\.[0-9]+$`) instead of frozen `== "3.0.0"`.
+  - **`sk- OpenAI` BLOCK fixture** → realistic key with digits, matching the digit requirement added in #29. String split via adjacent literals keeps the hook's own scanner from flagging the test source while bash assembles the full key at runtime.
+  - **Skill-count assertion** → `>=4` baseline instead of frozen `-eq 4` (skills are intentionally additive).
+  - **Header banner** trimmed to "QA Summary"; historical `vN.N.N` comments documenting when patterns were introduced are kept as audit trail.
+
+### Verification
+
+- `bash tests/test-release-qa.sh` → **PASS 162 / FAIL 0 / WARN 0** (was 159/2/1; matches reporter's claim).
+- `bash tests/test-secret-scanner.sh` → PASS 40 / FAIL 0 (no sibling regression).
+- `bash tests/validate-plugin.sh --skip-install-check` → PASS 79 / FAIL 0 / SKIP 1 (CI signal intact).
+
 ## [3.3.3] - 2026-05-24
 
 ### Added
