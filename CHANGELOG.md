@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.3] - 2026-05-24
+
+### Added
+
+- **`docs/architecture/etclovg-coverage.md`** — ETCLOVG 7-layer agent-harness taxonomy coverage map. Anchors scope decisions for future ADRs by making explicit per-layer status:
+  - `G` (Governance) — **Strong** (primary plugin focus; Three Loops, secret-scanner, governance-reviewer, 31 governance checks, 4 compliance mappings)
+  - `V` (Verification), `L` (Lifecycle), `C` (Context+Memory) — **Partial**
+  - `O` (Observability) — **None** (not in scope today)
+  - `E` (Execution / Sandbox) — **OOS-charter** (read-only-guidance principle, `pitimon/8-habit-ai-dev/CLAUDE.md` §50-67)
+  - `T` (Tooling / MCP) — **OOS-plugin-boundary** (routed to `pitimon/devsecops-ai-team`, memory observation #233270)
+
+  Source taxonomy: NotebookLM notebook `0f90fcee-b566-4a0b-919a-3df1aa7443cb` ("Agent Harness Engineering 202605", 48 sources, 2026-05-24). Drop date for re-evaluation: 2026-11-26 (6mo per ADR-016-style discipline). Reference document — not an ADR; no decision change. README architecture section + ADR-006 References now link to it.
+
+### Changed
+
+- **`README.md`** — Project Structure tree now includes `docs/architecture/`; a one-line forward link under the architecture mermaid points to the coverage map.
+- **`docs/adr/ADR-006-hook-design-principle-write-vs-edit.md`** — References section now cites the coverage map; ADR-006 is the canonical artifact under the `G` layer's hook-design discipline.
+
 ## [3.3.2] - 2026-05-24
 
 ### Fixed
