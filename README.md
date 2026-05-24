@@ -290,6 +290,8 @@ graph TB
     D1 -->|maps to| CHECK
 ```
 
+→ **[docs/architecture/etclovg-coverage.md](docs/architecture/etclovg-coverage.md)** — ETCLOVG 7-layer taxonomy coverage map (Agent Harness Engineering). Anchor for future scope-expansion decisions: `G` strong, `V/L/C` partial, `O` none, `E/T` out-of-scope by charter / plugin boundary.
+
 ---
 
 ## Token Budget
@@ -340,6 +342,8 @@ claude-governance/
 │   │   ├── ADR-004-iso-42001-framework-selection.md
 │   │   ├── ADR-005-nist-ai-rmf-cross-reference-doc.md
 │   │   └── ADR-006-hook-design-principle-write-vs-edit.md
+│   ├── architecture/
+│   │   └── etclovg-coverage.md   # ETCLOVG 7-layer taxonomy map (Agent Harness Engineering)
 │   └── compliance/
 │       └── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
 ├── scripts/
