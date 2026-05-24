@@ -90,6 +90,7 @@ These are the canonical external references for the ETCLOVG taxonomy and its com
 ## Maintenance
 
 - **Review trigger**: any new ADR that adds, expands, or changes architecture decisions affecting layer coverage updates this map in the same PR. This is recorded as a fitness-function-style expectation here, not enforced by a CI check.
+- **README mirror sync**: a condensed copy of the per-layer verdict table is inlined in `README.md` § "Agent Harness Coverage (ETCLOVG)" (added v3.3.5, PR #44). **This document is the single source of truth** — any change to a layer's `Status` here MUST update the README table in the same PR, or the two drift (the doc-drift class PR #43 fixed in v3.3.5).
 - **Drop date / next full re-evaluation**: **2026-11-26** (6 months from creation). At that point: if no layer status has shifted and no friction signal has arrived for any `Partial`/`None` layer, mark this map as "stable" and extend review interval. Otherwise refresh the Evidence column to reflect current state.
 - **Source-snapshot dependency**: this map cites NotebookLM notebook `0f90fcee` as of 2026-05-24. If the notebook is re-curated and the ETCLOVG layer names or responsibilities drift, validate the per-layer rows against the new taxonomy before refreshing.
 - **Charter alignment**: any move from `OOS-charter` to a non-OOS status requires a new ADR amending the read-only-guidance principle stated in `pitimon/8-habit-ai-dev/CLAUDE.md` §50-67.
