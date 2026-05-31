@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bump-version.sh — Update version across plugin.json, marketplace.json, and CHANGELOG.md
+# bump-version.sh — Update version across Claude/Codex plugin manifests and CHANGELOG.md
 # Usage: bash scripts/bump-version.sh <new-version>
 # Example: bash scripts/bump-version.sh 2.2.0
 set -euo pipefail
@@ -7,6 +7,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGIN_JSON="$REPO_ROOT/.claude-plugin/plugin.json"
 MARKETPLACE_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
+CODEX_PLUGIN_JSON="$REPO_ROOT/.codex-plugin/plugin.json"
 CHANGELOG="$REPO_ROOT/CHANGELOG.md"
 
 # --- Validate arguments ---
@@ -47,6 +48,19 @@ with open('$PLUGIN_JSON', 'w') as f:
 "
 echo "  Updated plugin.json"
 
+# --- Update Codex plugin.json ---
+python3 -c "
+import json
+
+with open('$CODEX_PLUGIN_JSON', 'r') as f:
+    d = json.load(f)
+d['version'] = '$NEW_VERSION'
+with open('$CODEX_PLUGIN_JSON', 'w') as f:
+    json.dump(d, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+"
+echo "  Updated .codex-plugin/plugin.json"
+
 # --- Update marketplace.json ---
 python3 -c "
 import json
@@ -82,12 +96,14 @@ echo "  Updated CHANGELOG.md with $HEADER"
 # --- Verify sync ---
 VER_PLUGIN=$(python3 -c "import json; print(json.load(open('$PLUGIN_JSON'))['version'])")
 VER_MKT=$(python3 -c "import json; print(json.load(open('$MARKETPLACE_JSON'))['plugins'][0]['version'])")
+VER_CODEX=$(python3 -c "import json; print(json.load(open('$CODEX_PLUGIN_JSON'))['version'])")
 
-if [[ "$VER_PLUGIN" == "$NEW_VERSION" && "$VER_MKT" == "$NEW_VERSION" ]]; then
+if [[ "$VER_PLUGIN" == "$NEW_VERSION" && "$VER_MKT" == "$NEW_VERSION" && "$VER_CODEX" == "$NEW_VERSION" ]]; then
   echo ""
   echo "Version bump complete: $CURRENT_VERSION → $NEW_VERSION"
   echo "  plugin.json:      $VER_PLUGIN"
   echo "  marketplace.json:  $VER_MKT"
+  echo "  codex plugin.json: $VER_CODEX"
   echo "  CHANGELOG.md:     header inserted"
   echo ""
   echo "Next: fill in CHANGELOG.md entries, then commit."
@@ -95,5 +111,6 @@ else
   echo "Error: version sync failed"
   echo "  plugin.json:      $VER_PLUGIN"
   echo "  marketplace.json:  $VER_MKT"
+  echo "  codex plugin.json: $VER_CODEX"
   exit 1
 fi

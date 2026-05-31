@@ -43,15 +43,19 @@ section "1. Structural Baseline"
 # Version
 VER_P=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
 VER_M=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+VER_C=$(python3 -c "import json; print(json.load(open('.codex-plugin/plugin.json'))['version'])")
 # Version-agnostic (#40): assert valid semver + sync, not a frozen literal.
 [[ "$VER_P" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && pass "plugin.json version = $VER_P (valid semver)" || fail "plugin.json version = $VER_P (not semver)"
-[[ "$VER_P" == "$VER_M" ]] && pass "Version sync: plugin.json = marketplace.json" || fail "Version mismatch: $VER_P != $VER_M"
+[[ "$VER_P" == "$VER_M" && "$VER_P" == "$VER_C" ]] && pass "Version sync: Claude plugin = marketplace = Codex plugin" || fail "Version mismatch: $VER_P != $VER_M != $VER_C"
 
 # Required files (v2.3.0 + v3.0.0)
 REQUIRED_FILES=(
   "hooks/secret-scanner.sh"
   "hooks/session-start.sh"
   "hooks/hooks.json"
+  ".codex-plugin/plugin.json"
+  ".agents/plugins/marketplace.json"
+  "AGENTS.md"
   "skills/governance-check/SKILL.md"
   "skills/create-adr/SKILL.md"
   "skills/spec-driven-dev/SKILL.md"
@@ -71,6 +75,7 @@ REQUIRED_FILES=(
   "examples/project-claude-md.example"
   "docs/adr/ADR-001-adopt-governance-framework.md"
   "docs/adr/ADR-002-consequence-based-authorization.md"
+  "docs/adr/ADR-007-codex-native-packaging.md"
   "docs/compliance/DSGAI-MAPPING.md"
   "scripts/bump-version.sh"
   "scripts/install-rules.sh"

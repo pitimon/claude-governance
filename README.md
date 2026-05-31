@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">claude-governance</h1>
   <p align="center">
-    Governance framework for Claude Code — fitness functions, secret scanning, spec-driven development, and OWASP DSGAI compliance.
+    Governance framework for Claude Code and Codex — fitness functions, spec-driven development, ADRs, and OWASP DSGAI compliance.
   </p>
   <p align="center">
     <a href="https://github.com/pitimon/claude-governance/actions/workflows/validate.yml"><img src="https://github.com/pitimon/claude-governance/actions/workflows/validate.yml/badge.svg" alt="Validate Plugin"></a>
@@ -29,11 +29,11 @@ AI-assisted development is fast — but ungoverned AI is a liability.
 | Team uses 5 different AI tools with no policy | Shadow AI policy template — approved tools, data rules   |
 | "Who decided to use MongoDB?" — no one knows  | ADR system records every architecture decision           |
 
-**Zero dependencies.** Zero build steps. Zero runtime overhead. Just Markdown skills and shell scripts that run inside Claude Code.
+**Zero dependencies.** Zero build steps. Markdown skills run in Claude Code and Codex; shell hooks run inside Claude Code.
 
 ---
 
-## What Happens When You Install
+## What Happens When You Install In Claude Code
 
 ```
 Session starts...
@@ -48,19 +48,26 @@ Session starts...
   Consequence Override: Irreversible operations → always In-the-Loop
 ```
 
-From this point, every `Edit`/`Write` is scanned for secrets. Every governance check is one command away.
+From this point, every Claude Code `Edit`/`Write` is scanned for secrets. In Codex, install exposes the governance skills and docs; run `governance-check` explicitly because Claude Code hooks do not run there.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install (one-time)
+# Claude Code install (one-time)
 claude plugin marketplace add pitimon/claude-governance
 claude plugin install claude-governance@claude-governance
 
 # (Optional) Install rules to ~/.claude/rules/
 bash ~/.claude/plugins/marketplaces/claude-governance/scripts/install-rules.sh
+
+# Codex install (skills + docs; Claude Code hooks do not run in Codex)
+codex plugin marketplace add pitimon/claude-governance
+codex plugin add claude-governance@pitimon-claude-governance
+
+# If you added the Codex marketplace before v3.4.0, refresh it first:
+codex plugin marketplace upgrade pitimon-claude-governance
 ```
 
 ---
@@ -305,7 +312,7 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 | **C** — Context & Memory          |       `Partial`       | `hooks/session-start.sh` (~360 tokens/session — Progressive Disclosure); skills lazy-load on `/command`                                                                                                                                              | No Compaction or Context Resets                                                   |
 | **L** — Lifecycle & Orchestration |       `Partial`       | Three Loops + Consequence Override (ADR-002) — autonomy classification with irreversible-op gating                                                                                                                                                   | No multi-agent orchestration or Planner-Generator-Evaluator structural separation |
 | **O** — Observability             |        `None`         | —                                                                                                                                                                                                                                                    | No trace / telemetry / SLA metrics — awaiting first-person friction signal        |
-| **V** — Verification              |       `Partial`       | 31 fitness functions (pre-commit / pre-PR / architecture), `governance-reviewer` agent, `validate-plugin.sh` (80 checks)                                                                                                                             | "Verify Before You Fix" sandbox gate not yet codified                             |
+| **V** — Verification              |       `Partial`       | 31 fitness functions (pre-commit / pre-PR / architecture), `governance-reviewer` agent, `validate-plugin.sh` (99 PASS + 1 SKIP)                                                                                                                       | "Verify Before You Fix" sandbox gate not yet codified                             |
 | **G** — Governance & Security     |     **`Strong`**      | (1) Three Loops + Consequence Override (ADR-002) · (2) `secret-scanner.sh` 25 BLOCK + 3 WARN · (3) `governance-reviewer` agent · (4) 31 governance checks · (5) Compliance mappings: EU AI Act / ISO 42001 / NIST AI RMF / OWASP DSGAI (11 controls) | — primary focus                                                                   |
 
 **Coverage summary**:
@@ -344,6 +351,11 @@ claude-governance/
 ├── .claude-plugin/
 │   ├── plugin.json              # Plugin metadata, skills path, keywords
 │   └── marketplace.json         # Marketplace listing schema
+├── .codex-plugin/
+│   └── plugin.json              # Codex plugin metadata, shared skills path
+├── .agents/plugins/
+│   └── marketplace.json         # Codex marketplace listing
+├── plugin -> .                  # Codex marketplace child source path
 ├── hooks/
 │   ├── hooks.json               # Hook registrations (SessionStart, PreToolUse)
 │   ├── session-start.sh         # Three Loops + Consequence Override injection
@@ -352,7 +364,9 @@ claude-governance/
 │   ├── governance-check/SKILL.md  # 31 checks across 3 categories
 │   ├── create-adr/SKILL.md       # ADR generator with governance loop
 │   ├── spec-driven-dev/SKILL.md   # Spec-first development workflow
-│   └── governance-setup/SKILL.md  # 6-step project initialization
+│   ├── governance-setup/SKILL.md  # 6-step project initialization
+│   ├── eu-ai-act-check/SKILL.md   # EU AI Act readiness checklist
+│   └── iso-42001-check/SKILL.md   # ISO/IEC 42001 AIMS readiness checklist
 ├── agents/
 │   └── governance-reviewer.md   # Deep compliance review with severity grading
 ├── examples/
@@ -371,18 +385,19 @@ claude-governance/
 │   │   ├── ADR-003-eu-ai-act-compliance-toolkit.md
 │   │   ├── ADR-004-iso-42001-framework-selection.md
 │   │   ├── ADR-005-nist-ai-rmf-cross-reference-doc.md
-│   │   └── ADR-006-hook-design-principle-write-vs-edit.md
+│   │   ├── ADR-006-hook-design-principle-write-vs-edit.md
+│   │   └── ADR-007-codex-native-packaging.md
 │   ├── architecture/
 │   │   └── etclovg-coverage.md   # ETCLOVG 7-layer taxonomy map (Agent Harness Engineering)
 │   └── compliance/
 │       └── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
 ├── scripts/
 │   ├── install-rules.sh         # Rules installer with backup
-│   └── bump-version.sh          # Version sync across 3 files
+│   └── bump-version.sh          # Version sync across Claude + Codex manifests
 ├── tests/
-│   ├── validate-plugin.sh       # Structural integrity (80 checks; 79 PASS + 1 SKIP in CI)
+│   ├── validate-plugin.sh       # Structural integrity (99 PASS + 1 SKIP in CI)
 │   ├── test-secret-scanner.sh   # 40 pattern-by-pattern tests
-│   └── test-release-qa.sh       # 162 QA checks (8-Habit verified; local-only, not in CI)
+│   └── test-release-qa.sh       # 166 QA checks (8-Habit verified; local-only, not in CI)
 ├── .github/workflows/
 │   └── validate.yml             # CI: structural + scanner tests
 ├── CHANGELOG.md
@@ -395,13 +410,13 @@ claude-governance/
 ## Development
 
 ```bash
-# Structural validation (79 PASS / 1 SKIP — CI signal)
+# Structural validation (99 PASS / 1 SKIP — CI signal)
 bash tests/validate-plugin.sh --skip-install-check
 
 # Scanner pattern tests (40 tests)
 bash tests/test-secret-scanner.sh
 
-# Full QA suite (162 checks, 8-Habit verified; local-only)
+# Full QA suite (166 checks, 8-Habit verified; local-only)
 bash tests/test-release-qa.sh
 
 # Bump version

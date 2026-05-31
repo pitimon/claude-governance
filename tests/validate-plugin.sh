@@ -5,6 +5,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGIN_DIR="$REPO_ROOT/.claude-plugin"
+CODEX_PLUGIN_DIR="$REPO_ROOT/.codex-plugin"
+CODEX_MARKETPLACE="$REPO_ROOT/.agents/plugins/marketplace.json"
 SKILLS_DIR="$REPO_ROOT/skills"
 HOOKS_DIR="$REPO_ROOT/hooks"
 CLAUDE_HOME="${HOME}/.claude"
@@ -36,7 +38,7 @@ json_valid() {
 # ============================================================
 section "1. JSON Validation"
 
-for f in "$PLUGIN_DIR/plugin.json" "$PLUGIN_DIR/marketplace.json" "$HOOKS_DIR/hooks.json"; do
+for f in "$PLUGIN_DIR/plugin.json" "$PLUGIN_DIR/marketplace.json" "$CODEX_PLUGIN_DIR/plugin.json" "$CODEX_MARKETPLACE" "$HOOKS_DIR/hooks.json"; do
   fname="${f#$REPO_ROOT/}"
   if [[ -f "$f" ]]; then
     if json_valid "$f"; then
@@ -66,6 +68,23 @@ print('ok')
   fi
 done
 
+# Required fields in Codex plugin.json
+for field in name version description author skills keywords interface; do
+  val=$(python3 -c "
+import json, sys
+d = json.load(open('$CODEX_PLUGIN_DIR/plugin.json'))
+v = d.get('$field')
+if v is None: sys.exit(1)
+if isinstance(v, str) and not v.strip(): sys.exit(1)
+print('ok')
+" 2>/dev/null || true)
+  if [[ "$val" == "ok" ]]; then
+    pass ".codex-plugin/plugin.json has required field '$field'"
+  else
+    fail ".codex-plugin/plugin.json missing or empty field '$field'"
+  fi
+done
+
 # Required fields in marketplace.json
 for field in name description plugins; do
   val=$(python3 -c "
@@ -84,6 +103,24 @@ print('ok')
   fi
 done
 
+# Required fields in Codex marketplace.json
+for field in name plugins; do
+  val=$(python3 -c "
+import json, sys
+d = json.load(open('$CODEX_MARKETPLACE'))
+v = d.get('$field')
+if v is None: sys.exit(1)
+if isinstance(v, str) and not v.strip(): sys.exit(1)
+if isinstance(v, list) and len(v) == 0: sys.exit(1)
+print('ok')
+" 2>/dev/null || true)
+  if [[ "$val" == "ok" ]]; then
+    pass ".agents/plugins/marketplace.json has required field '$field'"
+  else
+    fail ".agents/plugins/marketplace.json missing or empty field '$field'"
+  fi
+done
+
 # ============================================================
 # 2. Cross-File Naming Consistency
 # ============================================================
@@ -99,12 +136,28 @@ else
   fail "plugin.json name = '$plugin_name' (expected '$EXPECTED_NAME')"
 fi
 
+# Codex plugin name
+codex_plugin_name=$(json_field "$CODEX_PLUGIN_DIR/plugin.json" "name")
+if [[ "$codex_plugin_name" == "$EXPECTED_NAME" ]]; then
+  pass ".codex-plugin/plugin.json name = '$EXPECTED_NAME'"
+else
+  fail ".codex-plugin/plugin.json name = '$codex_plugin_name' (expected '$EXPECTED_NAME')"
+fi
+
 # Marketplace name
 mkt_name=$(json_field "$PLUGIN_DIR/marketplace.json" "name")
 if [[ "$mkt_name" == "$EXPECTED_NAME" ]]; then
   pass "marketplace.json name = '$EXPECTED_NAME'"
 else
   fail "marketplace.json name = '$mkt_name' (expected '$EXPECTED_NAME')"
+fi
+
+# Codex marketplace name
+codex_mkt_name=$(json_field "$CODEX_MARKETPLACE" "name")
+if [[ "$codex_mkt_name" == "pitimon-claude-governance" ]]; then
+  pass ".agents/plugins/marketplace.json name = 'pitimon-claude-governance'"
+else
+  fail ".agents/plugins/marketplace.json name = '$codex_mkt_name' (expected 'pitimon-claude-governance')"
 fi
 
 # Plugin name inside marketplace plugins array
@@ -119,6 +172,18 @@ else
   fail "marketplace.json plugins[0].name = '$mkt_plugin_name' (expected '$EXPECTED_NAME')"
 fi
 
+# Plugin name inside Codex marketplace plugins array
+codex_mkt_plugin_name=$(python3 -c "
+import json
+d = json.load(open('$CODEX_MARKETPLACE'))
+print(d['plugins'][0].get('name', ''))
+" 2>/dev/null || true)
+if [[ "$codex_mkt_plugin_name" == "$EXPECTED_NAME" ]]; then
+  pass ".agents/plugins/marketplace.json plugins[0].name = '$EXPECTED_NAME'"
+else
+  fail ".agents/plugins/marketplace.json plugins[0].name = '$codex_mkt_plugin_name' (expected '$EXPECTED_NAME')"
+fi
+
 # Version sync between plugin.json and marketplace.json
 ver_plugin=$(json_field "$PLUGIN_DIR/plugin.json" "version")
 ver_mkt=$(python3 -c "
@@ -126,10 +191,11 @@ import json
 d = json.load(open('$PLUGIN_DIR/marketplace.json'))
 print(d['plugins'][0].get('version', ''))
 " 2>/dev/null || true)
-if [[ "$ver_plugin" == "$ver_mkt" ]]; then
-  pass "Version sync: plugin.json ($ver_plugin) = marketplace.json ($ver_mkt)"
+ver_codex=$(json_field "$CODEX_PLUGIN_DIR/plugin.json" "version")
+if [[ "$ver_plugin" == "$ver_mkt" && "$ver_plugin" == "$ver_codex" ]]; then
+  pass "Version sync: Claude plugin ($ver_plugin) = Claude marketplace ($ver_mkt) = Codex plugin ($ver_codex)"
 else
-  fail "Version mismatch: plugin.json ($ver_plugin) != marketplace.json ($ver_mkt)"
+  fail "Version mismatch: Claude plugin ($ver_plugin), Claude marketplace ($ver_mkt), Codex plugin ($ver_codex)"
 fi
 
 # ============================================================
@@ -210,6 +276,59 @@ if [[ -f "$bump_script" ]]; then
   fi
 else
   fail "scripts/bump-version.sh not found"
+fi
+
+# 3.7b Codex plugin packaging
+if [[ -f "$CODEX_PLUGIN_DIR/plugin.json" ]]; then
+  pass ".codex-plugin/plugin.json exists"
+else
+  fail ".codex-plugin/plugin.json not found"
+fi
+
+codex_skills=$(json_field "$CODEX_PLUGIN_DIR/plugin.json" "skills")
+if [[ "$codex_skills" == "./skills/" ]]; then
+  pass ".codex-plugin/plugin.json skills path = './skills/'"
+else
+  fail ".codex-plugin/plugin.json skills path = '$codex_skills' (expected './skills/')"
+fi
+
+if [[ -f "$CODEX_MARKETPLACE" ]]; then
+  pass ".agents/plugins/marketplace.json exists"
+else
+  fail ".agents/plugins/marketplace.json not found"
+fi
+
+codex_source_path=$(python3 -c "
+import json
+d = json.load(open('$CODEX_MARKETPLACE'))
+print(d['plugins'][0].get('source', {}).get('path', ''))
+" 2>/dev/null || true)
+if [[ "$codex_source_path" == "./plugin" ]]; then
+  pass ".agents/plugins/marketplace.json source.path = './plugin'"
+else
+  fail ".agents/plugins/marketplace.json source.path = '$codex_source_path' (expected './plugin')"
+fi
+
+codex_installation=$(python3 -c "
+import json
+d = json.load(open('$CODEX_MARKETPLACE'))
+print(d['plugins'][0].get('policy', {}).get('installation', ''))
+" 2>/dev/null || true)
+codex_authentication=$(python3 -c "
+import json
+d = json.load(open('$CODEX_MARKETPLACE'))
+print(d['plugins'][0].get('policy', {}).get('authentication', ''))
+" 2>/dev/null || true)
+if [[ "$codex_installation" == "AVAILABLE" && "$codex_authentication" == "ON_INSTALL" ]]; then
+  pass ".agents/plugins/marketplace.json policy is installable"
+else
+  fail ".agents/plugins/marketplace.json policy unexpected (installation='$codex_installation', authentication='$codex_authentication')"
+fi
+
+if [[ -L "$REPO_ROOT/plugin" && "$(readlink "$REPO_ROOT/plugin")" == "." ]]; then
+  pass "plugin symlink points to repo root (Codex marketplace child path)"
+else
+  fail "plugin symlink missing or not pointing to repo root"
 fi
 
 # 3.8 Additional example templates

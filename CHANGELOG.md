@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-05-31
+
+### Added
+
+- **Native Codex plugin packaging**:
+  - `.codex-plugin/plugin.json` exposes the shared `./skills/` directory to Codex.
+  - `.agents/plugins/marketplace.json` publishes marketplace `pitimon-claude-governance`.
+  - `plugin -> .` symlink provides the child source path Codex marketplace installation expects.
+  - `AGENTS.md` documents cross-agent install and operating protocol.
+  - `docs/adr/ADR-007-codex-native-packaging.md` records the Codex packaging decision and the hook boundary.
+
+### Changed
+
+- README and CLAUDE architecture docs now distinguish Claude Code full enforcement (skills + hooks) from Codex skill packaging (skills + docs, no automatic hooks).
+- Validation now checks Codex packaging files and the `plugin` symlink so future releases cannot drop Codex installability silently.
+
+### Verification
+
+- `python3 /Users/itarun/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .`
+- `bash tests/validate-plugin.sh --skip-install-check`
+- `bash tests/test-secret-scanner.sh`
+- `bash tests/test-release-qa.sh`
+
 ## [3.3.6] - 2026-05-25
 
 ### Changed

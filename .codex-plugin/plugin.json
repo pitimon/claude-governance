@@ -1,0 +1,44 @@
+{
+  "name": "claude-governance",
+  "version": "3.4.0",
+  "description": "Governance framework for AI-assisted development: fitness checks, ADRs, spec-driven development, and compliance checklists.",
+  "author": {
+    "name": "pitimon",
+    "email": "pitimon@users.noreply.github.com",
+    "url": "https://github.com/pitimon"
+  },
+  "homepage": "https://github.com/pitimon/claude-governance#readme",
+  "repository": "https://github.com/pitimon/claude-governance",
+  "license": "MIT",
+  "keywords": [
+    "governance",
+    "fitness-functions",
+    "security",
+    "spec-driven",
+    "adr",
+    "three-loops",
+    "ai-autonomy",
+    "compliance",
+    "eu-ai-act",
+    "iso-42001",
+    "nist-ai-rmf"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Claude Governance",
+    "shortDescription": "Governance checks and decision discipline for AI-assisted development.",
+    "longDescription": "Claude Governance provides markdown skills for governance fitness checks, ADR creation, spec-driven development, project governance setup, EU AI Act readiness, and ISO/IEC 42001 AIMS readiness. The Codex package exposes the skills and documentation; Claude Code-specific hooks remain available only in Claude Code.",
+    "developerName": "pitimon",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/pitimon/claude-governance",
+    "defaultPrompt": [
+      "Run a governance-check on this change before I commit.",
+      "Create an ADR for this architecture decision.",
+      "Start a spec-driven-dev workflow for this feature."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

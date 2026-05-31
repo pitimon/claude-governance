@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**claude-governance** is a Claude Code plugin that provides governance skills for AI-assisted development. It has no runtime code or build system — it consists of declarative config files, Markdown skills, shell-based hooks, and example templates.
+**claude-governance** is a Claude Code and Codex plugin that provides governance skills for AI-assisted development. It has no build system — it consists of declarative config files, Markdown skills, Claude Code shell-based hooks, and example templates.
 
 Install: `claude plugin marketplace add pitimon/claude-governance`
+Codex install: `codex plugin marketplace add pitimon/claude-governance && codex plugin add claude-governance@pitimon-claude-governance`
 
 ## Repository Structure
 
@@ -14,6 +15,11 @@ Install: `claude plugin marketplace add pitimon/claude-governance`
 .claude-plugin/
   plugin.json            # Plugin metadata (name, version, author, skills, keywords)
   marketplace.json       # Marketplace listing schema
+.codex-plugin/
+  plugin.json            # Codex plugin metadata (skills only; hooks are Claude Code-specific)
+.agents/plugins/
+  marketplace.json       # Codex marketplace listing schema
+plugin -> .              # Codex marketplace child source path
 hooks/
   hooks.json             # Hook registrations (SessionStart, PreToolUse)
   session-start.sh       # Governance context injection (~300 tokens per session)
@@ -33,7 +39,7 @@ examples/
 scripts/
   install-rules.sh       # Installs rules to ~/.claude/rules/ with backup
 tests/
-  validate-plugin.sh     # Structural integrity validation (46 checks)
+  validate-plugin.sh     # Structural integrity validation (99 PASS + 1 SKIP)
 .github/workflows/
   validate.yml           # CI/CD — runs validate-plugin.sh on push/PR
 ```
@@ -75,9 +81,11 @@ Place Markdown templates in `examples/`. Update the README.md file structure sec
 
 ## Plugin Config
 
-- `plugin.json`: Must have `name`, `version`, `description`, `author`, `repository`, `license`, `skills`, `keywords`
-- `marketplace.json`: Follows `https://anthropic.com/claude-code/marketplace.schema.json` — lists plugins with `source` pointing to the plugin root
+- `.claude-plugin/plugin.json`: Must have `name`, `version`, `description`, `author`, `repository`, `license`, `skills`, `keywords`
+- `.claude-plugin/marketplace.json`: Follows `https://anthropic.com/claude-code/marketplace.schema.json` — lists plugins with `source` pointing to the plugin root
+- `.codex-plugin/plugin.json`: Codex manifest. Keep `skills: "./skills/"`; do not add Claude Code `hooks` here.
+- `.agents/plugins/marketplace.json`: Codex marketplace. Keep marketplace name `pitimon-claude-governance` and plugin source path `./plugin`.
 
 ## Validation
 
-Run `bash tests/validate-plugin.sh --skip-install-check` to verify plugin structure integrity. The script checks JSON validity, cross-file naming consistency, file integrity (all 4 skills, hooks, examples, agent), and keyword coverage.
+Run `bash tests/validate-plugin.sh --skip-install-check` to verify plugin structure integrity. The script checks JSON validity, cross-file naming consistency, Claude and Codex manifests, file integrity, hooks, examples, agents, compliance references, and keyword coverage.

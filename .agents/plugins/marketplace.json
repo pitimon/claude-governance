@@ -1,0 +1,20 @@
+{
+  "name": "pitimon-claude-governance",
+  "interface": {
+    "displayName": "Claude Governance"
+  },
+  "plugins": [
+    {
+      "name": "claude-governance",
+      "source": {
+        "source": "local",
+        "path": "./plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
