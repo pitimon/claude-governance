@@ -1,0 +1,38 @@
+# Data Classification
+
+> Classify all data handled by this project. Reference: OWASP DSGAI07.
+
+## Classification Levels
+
+| Level | Label | Description | Examples | Handling |
+|-------|-------|-------------|----------|----------|
+| 1 | **Public** | No sensitivity | Marketing copy, docs, open-source code | No restrictions |
+| 2 | **Internal** | Business-internal | Config, internal APIs, analytics | Access-controlled |
+| 3 | **Confidential** | Sensitive business data | User profiles, financial data | Encrypted at rest + transit |
+| 4 | **Restricted** | Regulated / critical | PII, credentials, PHI, secrets | Encrypted, audited, minimal access |
+
+## Project Data Inventory
+
+| Data Element | Classification | Storage | Encryption | Retention | Owner |
+|-------------|---------------|---------|------------|-----------|-------|
+| _User email_ | _Restricted (4)_ | _PostgreSQL_ | _AES-256_ | _Account lifetime + 30d_ | _Auth team_ |
+| _API keys_ | _Restricted (4)_ | _Vault/env vars_ | _N/A (never in code)_ | _Rotated 90d_ | _Platform team_ |
+| _Session logs_ | _Internal (2)_ | _S3_ | _SSE-S3_ | _90 days_ | _Ops team_ |
+
+## AI/LLM-Specific Data
+
+| Data Element | Classification | Sent to LLM? | Minimization Strategy |
+|-------------|---------------|---------------|----------------------|
+| _User prompts_ | _Confidential (3)_ | _Yes_ | _Strip PII before sending_ |
+| _Code context_ | _Internal (2)_ | _Yes_ | _Only relevant files, not full repo_ |
+| _API responses_ | _Varies_ | _No_ | _Cache locally, never log full response_ |
+| _Agent memory_ | _Confidential (3)_ | _Yes_ | _Scope per-project, TTL on entries_ |
+
+## Fitness Function Checks
+
+- [ ] All Restricted (4) data uses environment variables (never hardcoded)
+- [ ] CLAUDE.md and rules files contain no real data above Internal (2)
+- [ ] Session-start context contains no PII or credentials
+- [ ] MCP server configs do not expose Restricted data to external endpoints
+- [ ] Data retention policies documented for all Confidential+ data
+- [ ] AI/LLM data flows documented (what goes to external models)

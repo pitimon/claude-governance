@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGIN_DIR="$REPO_ROOT/.claude-plugin"
 CODEX_PLUGIN_DIR="$REPO_ROOT/.codex-plugin"
 CODEX_MARKETPLACE="$REPO_ROOT/.agents/plugins/marketplace.json"
+CODEX_CHILD_DIR="$REPO_ROOT/plugin"
 SKILLS_DIR="$REPO_ROOT/skills"
 HOOKS_DIR="$REPO_ROOT/hooks"
 CLAUDE_HOME="${HOME}/.claude"
@@ -38,7 +39,7 @@ json_valid() {
 # ============================================================
 section "1. JSON Validation"
 
-for f in "$PLUGIN_DIR/plugin.json" "$PLUGIN_DIR/marketplace.json" "$CODEX_PLUGIN_DIR/plugin.json" "$CODEX_MARKETPLACE" "$HOOKS_DIR/hooks.json"; do
+for f in "$PLUGIN_DIR/plugin.json" "$PLUGIN_DIR/marketplace.json" "$CODEX_PLUGIN_DIR/plugin.json" "$CODEX_CHILD_DIR/.codex-plugin/plugin.json" "$CODEX_MARKETPLACE" "$HOOKS_DIR/hooks.json"; do
   fname="${f#$REPO_ROOT/}"
   if [[ -f "$f" ]]; then
     if json_valid "$f"; then
@@ -192,10 +193,11 @@ d = json.load(open('$PLUGIN_DIR/marketplace.json'))
 print(d['plugins'][0].get('version', ''))
 " 2>/dev/null || true)
 ver_codex=$(json_field "$CODEX_PLUGIN_DIR/plugin.json" "version")
-if [[ "$ver_plugin" == "$ver_mkt" && "$ver_plugin" == "$ver_codex" ]]; then
-  pass "Version sync: Claude plugin ($ver_plugin) = Claude marketplace ($ver_mkt) = Codex plugin ($ver_codex)"
+ver_codex_child=$(json_field "$CODEX_CHILD_DIR/.codex-plugin/plugin.json" "version")
+if [[ "$ver_plugin" == "$ver_mkt" && "$ver_plugin" == "$ver_codex" && "$ver_plugin" == "$ver_codex_child" ]]; then
+  pass "Version sync: Claude plugin ($ver_plugin) = Claude marketplace ($ver_mkt) = Codex plugin ($ver_codex) = Codex child plugin ($ver_codex_child)"
 else
-  fail "Version mismatch: Claude plugin ($ver_plugin), Claude marketplace ($ver_mkt), Codex plugin ($ver_codex)"
+  fail "Version mismatch: Claude plugin ($ver_plugin), Claude marketplace ($ver_mkt), Codex plugin ($ver_codex), Codex child plugin ($ver_codex_child)"
 fi
 
 # ============================================================
@@ -325,11 +327,40 @@ else
   fail ".agents/plugins/marketplace.json policy unexpected (installation='$codex_installation', authentication='$codex_authentication')"
 fi
 
-if [[ -L "$REPO_ROOT/plugin" && "$(readlink "$REPO_ROOT/plugin")" == "." ]]; then
-  pass "plugin symlink points to repo root (Codex marketplace child path)"
+if [[ -d "$CODEX_CHILD_DIR" && ! -L "$CODEX_CHILD_DIR" ]]; then
+  pass "plugin is a real Codex child source directory"
 else
-  fail "plugin symlink missing or not pointing to repo root"
+  fail "plugin must be a real directory, not a symlink"
 fi
+
+if [[ -f "$CODEX_CHILD_DIR/.codex-plugin/plugin.json" ]]; then
+  pass "plugin/.codex-plugin/plugin.json exists"
+else
+  fail "plugin/.codex-plugin/plugin.json not found"
+fi
+
+child_codex_skills=$(json_field "$CODEX_CHILD_DIR/.codex-plugin/plugin.json" "skills")
+if [[ "$child_codex_skills" == "./skills/" ]]; then
+  pass "plugin/.codex-plugin/plugin.json skills path = './skills/'"
+else
+  fail "plugin/.codex-plugin/plugin.json skills path = '$child_codex_skills' (expected './skills/')"
+fi
+
+for mirror_dir in skills docs hooks agents examples scripts; do
+  if diff -qr "$REPO_ROOT/$mirror_dir" "$CODEX_CHILD_DIR/$mirror_dir" >/dev/null; then
+    pass "plugin/$mirror_dir is in sync with $mirror_dir"
+  else
+    fail "plugin/$mirror_dir is not in sync with $mirror_dir"
+  fi
+done
+
+for mirror_file in AGENTS.md CHANGELOG.md CLAUDE.md LICENSE README.md; do
+  if cmp -s "$REPO_ROOT/$mirror_file" "$CODEX_CHILD_DIR/$mirror_file"; then
+    pass "plugin/$mirror_file is in sync with $mirror_file"
+  else
+    fail "plugin/$mirror_file is not in sync with $mirror_file"
+  fi
+done
 
 # 3.8 Additional example templates
 for ex_extra in "shadow-ai-policy.md" "ai-supply-chain-checklist.md"; do
