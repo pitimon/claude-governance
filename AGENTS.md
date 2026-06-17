@@ -21,7 +21,7 @@ This is your install + operating protocol. Claude Code reads `./CLAUDE.md` autom
 
 ## Trust boundary
 
-Skills are guidance that an agent executes under the user's authority. Claude Code hooks provide local enforcement for Claude Code only. In Codex, use the skills as explicit checklists and workflows; do not assume `hooks/session-start.sh` or `hooks/secret-scanner.sh` are automatically active.
+Skills are guidance that an agent executes under the user's authority. Claude Code hooks provide local enforcement for Claude Code only. In Codex, use the skills as explicit checklists and workflows; do not assume `hooks/session-start.sh` or `hooks/secret-scanner.sh` are automatically active. Note that Codex still _parses_ `hooks/hooks.json` at install with a strict schema (top level = `hooks` only — see issue #51), so that file must stay schema-pure even though Codex does not run the hooks.
 
 ## Common tasks
 

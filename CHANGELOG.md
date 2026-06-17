@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.2] - 2026-06-17
+
+### Added
+
+- `tests/validate-plugin.sh` check 3.2b — asserts `hooks/hooks.json` (and its `plugin/` mirror) has only a top-level `hooks` key. Forcing function so the Codex parse-error class from #51 cannot silently return.
+
+### Changed
+
+- `AGENTS.md` clarifies that Codex still _parses_ `hooks/hooks.json` at install (strict schema) even though it does not run the hooks, so the file must stay schema-pure.
+
+### Fixed
+
+- **Codex hook-config parse failure** ([#51](https://github.com/pitimon/claude-governance/issues/51)) — removed the top-level `description` field from `hooks/hooks.json` (and its `plugin/` mirror). Codex auto-discovers and parses `hooks/hooks.json` at install/cache time with a strict schema that accepts only a top-level `hooks` key, so the sibling `description` made Codex reject the config: `unknown field 'description', expected 'hooks'`. Claude Code tolerated the extra key; Codex does not. `jq empty` still passes.
+
 ## [3.4.1] - 2026-06-08
 
 ### Fixed

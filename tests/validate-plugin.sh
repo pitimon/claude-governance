@@ -240,6 +240,26 @@ for hook_script in "$HOOKS_DIR/session-start.sh" "$HOOKS_DIR/secret-scanner.sh";
   fi
 done
 
+# 3.2b hooks/hooks.json top-level schema purity (Codex compat, issue #51)
+# Codex auto-discovers and parses hooks/hooks.json at install with a strict
+# schema that accepts ONLY a top-level "hooks" key. Any sibling key (e.g. a
+# "description") makes Codex reject the config: "unknown field `description`,
+# expected `hooks`". Claude Code tolerates it; Codex does not. Keep the top
+# level schema-pure so the same file installs cleanly in both runtimes.
+for hookcfg in "$HOOKS_DIR/hooks.json" "$CODEX_CHILD_DIR/hooks/hooks.json"; do
+  [[ -f "$hookcfg" ]] || continue
+  cfg_name="${hookcfg#$REPO_ROOT/}"
+  extra_keys=$(python3 -c "import json; d=json.load(open('$hookcfg')); print(' '.join(k for k in d if k != 'hooks'))" 2>/dev/null)
+  has_hooks=$(python3 -c "import json; print('yes' if 'hooks' in json.load(open('$hookcfg')) else 'no')" 2>/dev/null)
+  if [[ -n "$extra_keys" ]]; then
+    fail "$cfg_name has non-'hooks' top-level key(s); Codex rejects unknown fields (#51): $extra_keys"
+  elif [[ "$has_hooks" == "yes" ]]; then
+    pass "$cfg_name top level is schema-pure (only 'hooks')"
+  else
+    fail "$cfg_name missing top-level 'hooks' key"
+  fi
+done
+
 # 3.3 Required example files
 EXPECTED_EXAMPLES=("DOMAIN.md.example" "adr-template.md" "project-claude-md.example")
 for ex in "${EXPECTED_EXAMPLES[@]}"; do
