@@ -1,5 +1,4 @@
 {
-  "description": "Governance hooks — inject governance context at session start and scan for hardcoded secrets before file writes",
   "hooks": {
     "SessionStart": [
       {
