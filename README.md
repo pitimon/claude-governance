@@ -401,7 +401,7 @@ claude-governance/
 ├── tests/
 │   ├── validate-plugin.sh       # Structural integrity (100+ checks in CI)
 │   ├── test-secret-scanner.sh   # 40 pattern-by-pattern tests
-│   └── test-release-qa.sh       # 166 QA checks (8-Habit verified; local-only, not in CI)
+│   └── test-release-qa.sh       # 166 QA checks (8-Habit verified; runs in CI)
 ├── .github/workflows/
 │   └── validate.yml             # CI: structural + scanner tests
 ├── CHANGELOG.md

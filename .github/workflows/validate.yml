@@ -21,3 +21,16 @@ jobs:
 
       - name: Run secret scanner tests
         run: bash tests/test-secret-scanner.sh
+
+      - name: Run release QA checks
+        run: bash tests/test-release-qa.sh
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ShellCheck hooks and scripts
+        # The plugin's enforcement surface is shell. Gate on error+warning;
+        # info/style notes (e.g. intentional A && B || C idioms) do not fail CI.
+        run: shellcheck --severity=warning hooks/*.sh scripts/*.sh tests/*.sh
