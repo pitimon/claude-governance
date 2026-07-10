@@ -226,6 +226,32 @@ for skill in "${EXPECTED_SKILLS[@]}"; do
   fi
 done
 
+# 3.1b Skill allowlist completeness (catch additions AND deletions)
+# EXPECTED_SKILLS is a positive allowlist — a skill directory added without
+# updating it would silently skip frontmatter + discovery-surface validation.
+# Assert the on-disk skill set matches the allowlist exactly.
+disk_skills=()
+for d in "$SKILLS_DIR"/*/; do
+  [[ -d "$d" ]] || continue
+  disk_skills+=("$(basename "$d")")
+done
+if [[ "${#disk_skills[@]}" -eq "${#EXPECTED_SKILLS[@]}" ]]; then
+  pass "skill directory count (${#disk_skills[@]}) matches EXPECTED_SKILLS"
+else
+  fail "skill directory count (${#disk_skills[@]}) != EXPECTED_SKILLS (${#EXPECTED_SKILLS[@]}) — update the allowlist + discovery surfaces"
+fi
+for ds in "${disk_skills[@]}"; do
+  ds_found=false
+  for es in "${EXPECTED_SKILLS[@]}"; do
+    [[ "$ds" == "$es" ]] && ds_found=true && break
+  done
+  if [[ "$ds_found" == true ]]; then
+    pass "  on-disk skill '$ds' is covered by EXPECTED_SKILLS"
+  else
+    fail "  on-disk skill '$ds' NOT in EXPECTED_SKILLS (unvalidated — add it)"
+  fi
+done
+
 # 3.1c Skill discovery-surface freshness (drift guard, cross-platform)
 # Every skill must be advertised in ALL consumer-facing discovery surfaces so
 # neither Claude Code nor Codex users are taught a stale command list. This is
@@ -284,7 +310,7 @@ for hookcfg in "$HOOKS_DIR/hooks.json" "$CODEX_CHILD_DIR/hooks/hooks.json"; do
 done
 
 # 3.3 Required example files
-EXPECTED_EXAMPLES=("DOMAIN.md.example" "adr-template.md" "project-claude-md.example")
+EXPECTED_EXAMPLES=("DOMAIN.md.example" "adr-template.md" "project-claude-md.example" "DATA-CLASSIFICATION.md.example" "mcp-security-checklist.md" "ai-supply-chain-checklist.md" "shadow-ai-policy.md")
 for ex in "${EXPECTED_EXAMPLES[@]}"; do
   if [[ -f "$REPO_ROOT/examples/$ex" ]]; then
     pass "examples/$ex exists"
