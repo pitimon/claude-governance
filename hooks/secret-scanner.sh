@@ -13,10 +13,19 @@ fi
 # Read tool input from stdin
 INPUT=$(cat)
 
-# Extract content to scan based on tool type
-TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+# Extract the tool name. Parse with python3 (a hard requirement, checked above)
+# instead of a whitespace-sensitive grep: a grep like '"tool_name":"[^"]*"' only
+# matches compact JSON and returns empty on a payload with a space after the
+# colon, which used to fall through to a silent `exit 0` — a fail-open in the
+# security control. python3's json.load is whitespace-agnostic.
+TOOL_NAME=$(printf '%s' "$INPUT" | python3 -c "import sys,json
+try:
+    print(json.load(sys.stdin).get('tool_name',''))
+except Exception:
+    pass" 2>/dev/null)
 
 CONTENT=""
+RECOGNIZED=true
 case "$TOOL_NAME" in
   Write)
     CONTENT=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('content',''))" 2>/dev/null)
@@ -33,13 +42,21 @@ print(' '.join(e.get('new_string','') for e in edits))
 " 2>/dev/null)
     ;;
   *)
-    exit 0
+    RECOGNIZED=false
     ;;
 esac
 
-# If no content extracted, allow
+# Fail-safe: never silently allow. If content extraction produced nothing —
+# whether tool_name was unparseable/unexpected, or the tool_input shape changed
+# so extraction returned empty — fall back to scanning the RAW hook payload so a
+# secret cannot slip through on a payload we failed to parse. (Claude Code
+# currently emits compact JSON that parses cleanly, so this is defense-in-depth,
+# not the hot path.) A recognized tool with genuinely empty content scans the
+# raw payload too, but stays silent — only an unrecognized/unparseable tool
+# warns, so a legitimate empty-file write is not noisy.
 if [ -z "$CONTENT" ]; then
-  exit 0
+  CONTENT="$INPUT"
+  [ "$RECOGNIZED" = false ] && FELL_BACK=true
 fi
 
 # === BLOCK PATTERNS (exit 2) — secrets and credentials ===
@@ -144,6 +161,13 @@ if [ "$PII_WARNED" = true ]; then
   echo "" >&2
   echo "PII detected. Ensure data handling complies with your data classification policy." >&2
   echo "See: examples/DATA-CLASSIFICATION.md.example for guidance. [DSGAI01]" >&2
+fi
+
+# Surface a parse-failure fallback (never silent). We reached here without
+# blocking, so no secret was found in the raw payload — but the operator should
+# know the structured path failed so a recurring failure can be investigated.
+if [ "${FELL_BACK:-false}" = true ]; then
+  echo "Governance: WARNING — could not parse tool payload (tool_name='${TOOL_NAME:-<empty>}'); scanned raw input as a fallback, no secret found. If this recurs, the hook's JSON parsing may need updating." >&2
 fi
 
 exit 0

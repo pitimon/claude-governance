@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.4] - 2026-07-10
+
+Hardens the `secret-scanner.sh` PreToolUse hook against a fail-open reproduced during a maintenance review. Claude Code-only (Codex does not run hooks); `hooks/hooks.json` top-level schema stays pure for Codex install (#51).
+
+### Fixed
+
+- **`hooks/secret-scanner.sh` fail-open (reproduced).** `tool_name` was extracted with `grep -o '"tool_name":"[^"]*"'`, which only matches compact JSON. A payload with a space after the colon (`"tool_name": "Write"`) yielded an empty `tool_name`, fell through the `case` to a silent `exit 0`, and let a hardcoded secret pass — the security control disabled itself. Reproduced directly: a spaced payload carrying an `sk-ant-` key returned exit 0 (allow) where the compact form returned exit 2 (block). Current Claude Code emits compact JSON so this was not triggered in practice, but a security control must not depend on serialization formatting.
+
+### Changed
+
+- `tool_name` is now parsed with `python3` (already a hard requirement) instead of a whitespace-sensitive grep.
+- **Raw-scan fallback (never silent).** When content extraction yields nothing — unparseable/unexpected `tool_name`, or a changed `tool_input` shape — the scanner now scans the raw hook payload as a backstop: a secret still triggers `exit 2`; a clean payload exits 0 but, for an unrecognized tool, emits a `WARNING` to stderr rather than silently allowing. A recognized empty-file write stays silent (no noise). This closes both prior silent-allow exits.
+- `hooks/hooks.json` PreToolUse `timeout` corrected from `500` to `5` (Claude Code hook timeouts are seconds; `500` was an apparent seconds/ms slip). The field is nested, not top-level, so Codex install-time schema purity (#51) is unaffected — asserted by validate-plugin check 3.2b.
+- `tests/test-secret-scanner.sh`: +4 fail-open regression cases (spaced-JSON block, raw-scan fallback block for unparseable + unrecognized-tool payloads, warn-not-silent on clean parse failure). 40 → 44 checks.
+
 ## [3.4.3] - 2026-07-10
 
 Freshness sweep — the `eu-ai-act-check` (v3.1.0) and `iso-42001-check` (v3.2.0) skills shipped without being advertised in the plugin's consumer-facing discovery surfaces. Scope: Claude Code-facing surfaces only (the Codex entry point `AGENTS.md` already listed all six).
