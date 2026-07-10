@@ -226,6 +226,29 @@ for skill in "${EXPECTED_SKILLS[@]}"; do
   fi
 done
 
+# 3.1c Skill discovery-surface freshness (drift guard, cross-platform)
+# Every skill must be advertised in ALL consumer-facing discovery surfaces so
+# neither Claude Code nor Codex users are taught a stale command list. This is
+# the durable fix for the v3.1/v3.2 drift where eu-ai-act-check / iso-42001-check
+# shipped without being swept into these surfaces. session-start.sh + README +
+# CLAUDE.md are Claude-facing; AGENTS.md is the Codex entry point.
+DISCOVERY_SURFACES=(
+  "$HOOKS_DIR/session-start.sh"
+  "$REPO_ROOT/README.md"
+  "$REPO_ROOT/CLAUDE.md"
+  "$REPO_ROOT/AGENTS.md"
+)
+for skill in "${EXPECTED_SKILLS[@]}"; do
+  for surface in "${DISCOVERY_SURFACES[@]}"; do
+    surface_name="${surface#$REPO_ROOT/}"
+    if grep -q -- "$skill" "$surface" 2>/dev/null; then
+      pass "  '$skill' advertised in $surface_name"
+    else
+      fail "  '$skill' MISSING from $surface_name (skill-discovery drift)"
+    fi
+  done
+done
+
 # 3.2 Hook scripts are executable
 for hook_script in "$HOOKS_DIR/session-start.sh" "$HOOKS_DIR/secret-scanner.sh"; do
   script_name="${hook_script#$REPO_ROOT/}"

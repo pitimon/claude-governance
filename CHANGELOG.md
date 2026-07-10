@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.3] - 2026-07-10
+
+Freshness sweep — the `eu-ai-act-check` (v3.1.0) and `iso-42001-check` (v3.2.0) skills shipped without being advertised in the plugin's consumer-facing discovery surfaces. Scope: Claude Code-facing surfaces only (the Codex entry point `AGENTS.md` already listed all six).
+
+### Added
+
+- `tests/validate-plugin.sh` check 3.1c — asserts every skill in `EXPECTED_SKILLS` is advertised in all four discovery surfaces (`hooks/session-start.sh`, `README.md`, `CLAUDE.md`, and the Codex entry point `AGENTS.md`). Durable guard so a new skill cannot ship without being swept into the command list on either runtime. (+24 checks.)
+
+### Changed
+
+- `hooks/session-start.sh` "Available Commands" block now lists `/eu-ai-act-check` and `/iso-42001-check` — this context is injected every session, so the stale list was actively teaching a four-command surface at runtime.
+- `README.md` On-Demand table and Architecture diagram, and `CLAUDE.md` skills tree, now list all six skills.
+- Replaced fragile literal counts (`99 PASS + 1 SKIP`, `6 ADRs (ADR-001 … ADR-006)`) in `README.md` and `CLAUDE.md` with hedged phrasing (`100+ structural checks`, `ADR set (see docs/adr/)`) — the check count changes as tests are added, so a hard literal is stale on arrival.
+
 ## [3.4.2] - 2026-06-17
 
 ### Added
