@@ -24,6 +24,8 @@ hooks/
   hooks.json             # Hook registrations (SessionStart, PreToolUse)
   session-start.sh       # Governance context injection (~300 tokens per session)
   secret-scanner.sh      # Blocks file writes containing hardcoded secrets
+  session-start.ps1      # PowerShell port of session-start.sh (native Windows, no Git Bash)
+  secret-scanner.ps1     # PowerShell port of secret-scanner.sh (parity-tested on Windows CI)
 skills/
   spec-driven-dev/SKILL.md    # /spec-driven-dev — spec-first development workflow
   governance-check/SKILL.md   # /governance-check — fitness function runner

@@ -23,6 +23,8 @@ This is your install + operating protocol. Claude Code reads `./CLAUDE.md` autom
 
 Skills are guidance that an agent executes under the user's authority. Claude Code hooks provide local enforcement for Claude Code only. In Codex, use the skills as explicit checklists and workflows; do not assume `hooks/session-start.sh` or `hooks/secret-scanner.sh` are automatically active. Note that Codex still _parses_ `hooks/hooks.json` at install with a strict schema (top level = `hooks` only — see issue #51), so that file must stay schema-pure even though Codex does not run the hooks.
 
+PowerShell ports (`hooks/secret-scanner.ps1`, `hooks/session-start.ps1`) exist for Claude Code on native Windows without Git Bash; they are verified equivalent to the `.sh` hooks on a `windows-latest` CI job. Codex does not run them either. See the Platform Support table in `README.md`.
+
 ## Common tasks
 
 - **"Check this before commit"** -> `skills/governance-check/SKILL.md`
