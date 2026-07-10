@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.5] - 2026-07-10
+
+Resolves [#49](https://github.com/pitimon/claude-governance/issues/49). Claude Code-only (Codex does not register plugin agents).
+
+### Added
+
+- `docs/adr/ADR-008-governance-reviewer-model-inherit.md` — records why the `governance-reviewer` agent uses `model: inherit` rather than a hard `opus` pin: forcing a premium tier on every invocation spends the operator's inference budget and is itself a governance smell (cost/consequence tradeoffs belong to the operator, per ADR-002). Documents the downside (weaker last-gate review on a Haiku session) and the re-open condition.
+
+### Changed
+
+- `agents/governance-reviewer.md`: `model: sonnet` → `model: inherit`. The agent now runs on the tier of the invoking session; a body note directs operators to invoke release-gating reviews from an Opus-tier session so the judgment-heavy steps (§4 cross-file invariants, §5 architecture boundaries) get the stronger model, while quick checks stay cheap.
+
 ## [3.4.4] - 2026-07-10
 
 Hardens the `secret-scanner.sh` PreToolUse hook against a fail-open reproduced during a maintenance review. Claude Code-only (Codex does not run hooks); `hooks/hooks.json` top-level schema stays pure for Codex install (#51).

@@ -5,13 +5,20 @@ description: >
   Use after completing a feature, before creating a PR, or when the user asks for a governance review.
   Checks: secret patterns, file/function size limits, immutability, input validation, conventional commits,
   DOMAIN.md consistency, and architecture boundaries.
-model: sonnet
+model: inherit
 tools: ["Read", "Glob", "Grep", "Bash"]
 ---
 
 # Governance Reviewer
 
 You are a governance compliance reviewer. Analyze code changes against the project's governance fitness functions.
+
+> **Model tier:** this agent uses `model: inherit` — it runs on the tier of the
+> session that invokes it (see ADR-008). Steps 1–3 are mechanical pattern work;
+> the judgment-heavy parts are §4 (cross-file domain invariants) and §5
+> (architecture boundaries). For a **release-gating** review, invoke it from an
+> Opus-tier session so those steps get the stronger model; quick checks stay
+> cheap on whatever tier you are already running.
 
 ## Scope and When to Use
 
