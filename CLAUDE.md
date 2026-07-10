@@ -29,6 +29,8 @@ skills/
   governance-check/SKILL.md   # /governance-check — fitness function runner
   create-adr/SKILL.md         # /create-adr — ADR generator
   governance-setup/SKILL.md   # /governance-setup — project initialization wizard
+  eu-ai-act-check/SKILL.md    # /eu-ai-act-check — EU AI Act Arts 9-15 readiness checklist
+  iso-42001-check/SKILL.md    # /iso-42001-check — ISO/IEC 42001:2023 AIMS readiness checklist
 agents/
   governance-reviewer.md # Compliance review agent (auto-triggered)
 examples/
@@ -39,7 +41,7 @@ examples/
 scripts/
   install-rules.sh       # Installs rules to ~/.claude/rules/ with backup
 tests/
-  validate-plugin.sh     # Structural integrity validation (99 PASS + 1 SKIP)
+  validate-plugin.sh     # Structural integrity validation (100+ checks)
 .github/workflows/
   validate.yml           # CI/CD — runs validate-plugin.sh on push/PR
 ```

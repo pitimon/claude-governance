@@ -1,6 +1,6 @@
 {
   "name": "claude-governance",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "description": "Governance framework for AI-assisted development: fitness checks, ADRs, spec-driven development, and compliance checklists.",
   "author": {
     "name": "pitimon",

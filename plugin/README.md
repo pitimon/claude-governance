@@ -157,6 +157,8 @@ You: /governance-setup
 | `/create-adr`         | After architecture decision   | `/create-adr "Adopt PostgreSQL over MongoDB"` |
 | `/spec-driven-dev`    | Before feature implementation | `/spec-driven-dev` → writes spec.md           |
 | `/governance-setup`   | New project initialization    | Creates DOMAIN.md, ADRs, rules                |
+| `/eu-ai-act-check`    | Before high-risk AI release   | EU AI Act Arts 9-15 readiness checklist       |
+| `/iso-42001-check`    | Before AIMS audit / attest    | ISO/IEC 42001:2023 AIMS 9-clause checklist    |
 | `governance-reviewer` | Before PR (auto-triggered)    | Deep multi-file review with severity grading  |
 
 ### 31 Governance Checks
@@ -281,19 +283,21 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
    │  Three Loops +      │  │   31 checks /    │  │   5 rule files   │
    │  Consequence        │  │   3 categories   │  │                  │
    │  ~360 tokens        │  │                  │  │ Templates        │
-   │                     │  │ /create-adr      │  │   6 examples     │
+   │                     │  │ /create-adr      │  │   7 examples     │
    │ PreToolUse Hook     │  │ /spec-driven-dev │  │                  │
    │  Secret Scanner     │  │ /governance-setup│  │ Always loaded if │
    │  25 BLOCK + 3 WARN  │  │                  │  │ installed.       │
    │  blocks file writes │  │ governance-      │  │                  │
    └─────────────────────┘  │ reviewer agent   │  └──────────────────┘
                             │   deep + severity│
+                            │ /eu-ai-act-check │
+                            │ /iso-42001-check │
                             └──────────────────┘
 
    ┌──────────────────────────────────────────────────────────────┐
    │  Compliance Anchors                                          │
    │  • DSGAI-MAPPING.md → 11 OWASP DSGAI controls                │
-   │  • docs/adr/        → 6 ADRs (ADR-001 … ADR-006)             │
+   │  • docs/adr/        → ADR set (see docs/adr/)                │
    └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -312,7 +316,7 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 | **C** — Context & Memory          |       `Partial`       | `hooks/session-start.sh` (~360 tokens/session — Progressive Disclosure); skills lazy-load on `/command`                                                                                                                                              | No Compaction or Context Resets                                                   |
 | **L** — Lifecycle & Orchestration |       `Partial`       | Three Loops + Consequence Override (ADR-002) — autonomy classification with irreversible-op gating                                                                                                                                                   | No multi-agent orchestration or Planner-Generator-Evaluator structural separation |
 | **O** — Observability             |        `None`         | —                                                                                                                                                                                                                                                    | No trace / telemetry / SLA metrics — awaiting first-person friction signal        |
-| **V** — Verification              |       `Partial`       | 31 fitness functions (pre-commit / pre-PR / architecture), `governance-reviewer` agent, `validate-plugin.sh` (99 PASS + 1 SKIP)                                                                                                                       | "Verify Before You Fix" sandbox gate not yet codified                             |
+| **V** — Verification              |       `Partial`       | 31 fitness functions (pre-commit / pre-PR / architecture), `governance-reviewer` agent, `validate-plugin.sh` (100+ structural checks)                                                                                                                | "Verify Before You Fix" sandbox gate not yet codified                             |
 | **G** — Governance & Security     |     **`Strong`**      | (1) Three Loops + Consequence Override (ADR-002) · (2) `secret-scanner.sh` 25 BLOCK + 3 WARN · (3) `governance-reviewer` agent · (4) 31 governance checks · (5) Compliance mappings: EU AI Act / ISO 42001 / NIST AI RMF / OWASP DSGAI (11 controls) | — primary focus                                                                   |
 
 **Coverage summary**:
@@ -395,7 +399,7 @@ claude-governance/
 │   ├── install-rules.sh         # Rules installer with backup
 │   └── bump-version.sh          # Version sync across Claude + Codex manifests
 ├── tests/
-│   ├── validate-plugin.sh       # Structural integrity (99 PASS + 1 SKIP in CI)
+│   ├── validate-plugin.sh       # Structural integrity (100+ checks in CI)
 │   ├── test-secret-scanner.sh   # 40 pattern-by-pattern tests
 │   └── test-release-qa.sh       # 166 QA checks (8-Habit verified; local-only, not in CI)
 ├── .github/workflows/
@@ -410,7 +414,7 @@ claude-governance/
 ## Development
 
 ```bash
-# Structural validation (99 PASS / 1 SKIP — CI signal)
+# Structural validation (100+ checks — CI signal)
 bash tests/validate-plugin.sh --skip-install-check
 
 # Scanner pattern tests (40 tests)
