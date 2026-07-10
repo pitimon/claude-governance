@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.6] - 2026-07-10
+
+CI hardening. The enforcement surface of this plugin is shell scripts, and one release gate ran only locally.
+
+### Added
+
+- `.github/workflows/validate.yml`: a **`shellcheck`** job (`--severity=warning`) over `hooks/`, `scripts/`, and `tests/` shell scripts — the plugin's enforcement layer is shell and had no lint gate. Info/style notes (intentional `A && B || C` idioms) do not fail CI.
+- CI now runs `tests/test-release-qa.sh` (166 checks). It was version-agnostic and passing since #40 but only enforced locally, despite the CHANGELOG treating it as part of the release ritual — now it is release-gating in fact.
+
+### Fixed
+
+- `tests/test-release-qa.sh` line 9: `cd "$REPO_ROOT"` → `cd "$REPO_ROOT" || exit 1` (SC2164 — the only shellcheck warning; a failed `cd` would otherwise run the whole suite in the wrong directory).
+- `README.md`: the file-tree comment for `test-release-qa.sh` said "local-only, not in CI" — corrected to "runs in CI" now that the workflow enforces it.
+
 ## [3.4.5] - 2026-07-10
 
 Resolves [#49](https://github.com/pitimon/claude-governance/issues/49). Claude Code-only (Codex does not register plugin agents).
