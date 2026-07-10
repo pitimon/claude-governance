@@ -34,3 +34,23 @@ jobs:
         # The plugin's enforcement surface is shell. Gate on error+warning;
         # info/style notes (e.g. intentional A && B || C idioms) do not fail CI.
         run: shellcheck --severity=warning hooks/*.sh scripts/*.sh tests/*.sh
+
+  powershell-hooks:
+    # Verifies the PowerShell hook ports (for native-Windows without Git Bash)
+    # stay behaviourally identical to the bash hooks, on real Windows PowerShell.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secret-scanner parity (shared fixtures)
+        shell: powershell
+        run: .\tests\test-secret-scanner.ps1
+
+      - name: session-start.ps1 emits valid JSON matching session-start.sh
+        shell: powershell
+        run: |
+          $ps = & .\hooks\session-start.ps1 | Out-String
+          $obj = $ps | ConvertFrom-Json   # throws if invalid JSON
+          if ($obj.hookSpecificOutput.hookEventName -ne 'SessionStart') { throw 'wrong hookEventName' }
+          if (-not $obj.hookSpecificOutput.additionalContext) { throw 'empty additionalContext' }
+          Write-Host 'session-start.ps1 JSON OK'

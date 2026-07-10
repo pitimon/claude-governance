@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-07-10
+
+PowerShell hook ports for Claude Code on native Windows without Git Bash — where Claude Code falls back to the PowerShell shell tool and the `.sh` hooks cannot run, so the secret scanner would otherwise be silently absent. Claude Code-only (Codex does not run hooks). Scanner parity was verified on real Windows PowerShell 5.1 (38/38 shared fixtures) and is gated on a `windows-latest` CI job.
+
+### Added
+
+- `hooks/secret-scanner.ps1` — PowerShell port of `secret-scanner.sh`. Byte-for-byte behavioural parity: case-sensitive matching (`-cmatch`) and line-by-line scanning to mirror `grep -E`; the same 22 BLOCK + 3 two-stage DIGIT_REQUIRED + 3 WARN patterns; the same raw-scan fallback (never silent). Verified 38/38 against the shared fixtures on Windows PowerShell 5.1.
+- `hooks/session-start.ps1` — PowerShell port of `session-start.sh`, emitting the identical SessionStart JSON (UTF-8 with BOM so PS 5.1 renders the unicode arrows/em-dashes correctly).
+- `tests/fixtures/scanner-cases.jsonl` — shared scanner fixtures (payload + expected outcome) consumed by the Windows parity test; the bash suite is checked against the same set so `.ps1` and `.sh` cannot drift.
+- `tests/test-secret-scanner.ps1` — Windows-side parity runner over the shared fixtures.
+- `.github/workflows/validate.yml`: a `powershell-hooks` job on `windows-latest` running the parity test + a `session-start.ps1` JSON-validity check.
+
+### Notes
+
+- **Auto-dispatch is intentionally not wired into `hooks/hooks.json`.** Claude Code exposes one hook `command` per event with no OS switch; selecting `.ps1` vs `.sh` per-OS without breaking macOS/Linux (or emitting per-edit errors there) needs a mechanism only confirmable on a real Windows + Claude Code install. The `.ps1` hooks ship now (proven on Windows) and can be wired manually; full auto-dispatch is tracked in [#58](https://github.com/pitimon/claude-governance/issues/58). See the Platform Support table in `README.md`.
+
 ## [3.4.6] - 2026-07-10
 
 CI hardening. The enforcement surface of this plugin is shell scripts, and one release gate ran only locally.

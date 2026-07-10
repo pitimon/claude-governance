@@ -335,6 +335,23 @@ Understand ──> Specify ──> Plan ──> Implement ──> Verify
 
 ---
 
+## Platform Support
+
+Skills, ADRs, and compliance docs are plain Markdown and work identically everywhere. The **hooks** (SessionStart context + PreToolUse secret scanner) are the only platform-sensitive surface:
+
+| Environment | Hook behaviour |
+| --- | --- |
+| macOS / Linux | `.sh` hooks run via bash (default) |
+| Windows **with** Git for Windows | `.sh` hooks run via Git Bash (Claude Code's default shell there) |
+| Windows **without** Git Bash | Claude Code falls back to the PowerShell shell tool; `.sh` hooks cannot run. PowerShell ports — `hooks/secret-scanner.ps1`, `hooks/session-start.ps1` — are provided and verified byte-for-byte equivalent to the bash hooks (parity gated on a `windows-latest` CI job). |
+| **Codex** (any OS) | Does not run hooks at all — skills are used as explicit checklists. |
+
+> **Native-Windows auto-dispatch is not yet wired into the default `hooks/hooks.json`.** Claude Code exposes a single hook `command` per event with no OS switch, and selecting the right script per-OS without breaking macOS/Linux users (or spamming them with per-edit errors) needs a mechanism that can only be confirmed on a real Windows + Claude Code install. That validation is tracked in **[#58](https://github.com/pitimon/claude-governance/issues/58)**. The `.ps1` hooks ship now (proven on Windows PowerShell 5.1) so the port is ready the moment dispatch is confirmed; a technical user can also wire them manually via a personal `settings.json` PreToolUse/SessionStart hook that runs `powershell -NoProfile -ExecutionPolicy Bypass -File <path>` (Windows PowerShell requires `-ExecutionPolicy Bypass` under the default Restricted policy).
+
+**Requirement for the PowerShell path:** Windows 10 1809+ with Windows PowerShell 5.1 (included by default).
+
+---
+
 ## Token Budget
 
 | Component            | Tokens   | When                        |

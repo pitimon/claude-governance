@@ -1,0 +1,38 @@
+{"id": "api_key", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"API_KEY = \\\"abcdefghij1234567890\\\"\"}}", "expect": "block"}
+{"id": "password", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"password = \\\"mysecret\\\"\"}}", "expect": "block"}
+{"id": "sk_openai", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"sk-abc123def456ghi789jkl012\"}}", "expect": "block"}
+{"id": "sk_proj", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"sk-proj-abc123def456ghi789jkl012\"}}", "expect": "block"}
+{"id": "sk_ant", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"sk-ant-api03-abcdefghijklmnopqrst9\"}}", "expect": "block"}
+{"id": "ghp", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"ghp_abcdefghijklmnopqrstuvwxyz1234567890\"}}", "expect": "block"}
+{"id": "gho", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"gho_abcdefghijklmnopqrstuvwxyz1234567890\"}}", "expect": "block"}
+{"id": "ghs", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"ghs_abcdefghijklmnopqrstuvwxyz1234567890\"}}", "expect": "block"}
+{"id": "akia", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"AKIAIOSFODNN7EXAMPLE\"}}", "expect": "block"}
+{"id": "slack", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"xoxb-123456789-abcdefghij\"}}", "expect": "block"}
+{"id": "privkey", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"-----BEGIN RSA PRIVATE KEY-----\"}}", "expect": "block"}
+{"id": "jwt", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkw\"}}", "expect": "block"}
+{"id": "google", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"AIzaSyA1234567890abcdefghijklmnopqrstuv\"}}", "expect": "block"}
+{"id": "azure", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"DefaultEndpointsProtocol=https;AccountName=myaccount\"}}", "expect": "block"}
+{"id": "mongo", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"mongodb+srv://user:pass@cluster.mongodb.net\"}}", "expect": "block"}
+{"id": "token", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"Token = \\\"abc123def456xyz\\\"\"}}", "expect": "block"}
+{"id": "github_token", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"GITHUB_TOKEN = \\\"ghp_xxxxx\\\"\"}}", "expect": "block"}
+{"id": "gh_token", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"GH_TOKEN = \\\"ghp_xxxxx\\\"\"}}", "expect": "block"}
+{"id": "bearer", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9xxxx\"}}", "expect": "block"}
+{"id": "plain", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"Hello world\"}}", "expect": "allow"}
+{"id": "envref", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"const key = process.env.API_KEY\"}}", "expect": "allow"}
+{"id": "short", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"x = 42\"}}", "expect": "allow"}
+{"id": "comment_sk", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"# sk- prefix is used for API keys\"}}", "expect": "allow"}
+{"id": "auth_prose", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"# Doc mentions the Authorization header\"}}", "expect": "allow"}
+{"id": "db_prose", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"We use mongodb as our document store.\"}}", "expect": "allow"}
+{"id": "nist_slug", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"see nist.gov/itl/ai-risk-management-framework for details\"}}", "expect": "allow"}
+{"id": "sk_short", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"the value sk-9 is too short to be a key\"}}", "expect": "allow"}
+{"id": "sk_noletdigit", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"sk-aaaaaaaaaaaaaaaaaaaa is letters only\"}}", "expect": "allow"}
+{"id": "email", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"contact me at john.doe@example.com please\"}}", "expect": "warn"}
+{"id": "ssn", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"ssn 123-45-6789 here\"}}", "expect": "warn"}
+{"id": "cc", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"card 4111 1111 1111 1111 here\"}}", "expect": "warn"}
+{"id": "read_tool", "payload": "{\"tool_name\": \"Read\", \"tool_input\": {\"file_path\": \"/tmp/x\"}}", "expect": "warn"}
+{"id": "edit_secret", "payload": "{\"tool_name\": \"Edit\", \"tool_input\": {\"file_path\": \"/tmp/x\", \"old_string\": \"x\", \"new_string\": \"sk-ant-api03-abcdefghijklmnopqrst9\"}}", "expect": "block"}
+{"id": "empty", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"\"}}", "expect": "allow"}
+{"id": "spaced_secret", "payload": "{\"tool_name\": \"Write\", \"tool_input\": {\"content\": \"key = sk-ant-api03-abcdefghijklmnopqrst9\"}}", "expect": "block"}
+{"id": "unparseable", "payload": "not valid json but contains sk-ant-api03-abcdefghijklmnopqrst9 inline", "expect": "block"}
+{"id": "unrec_secret", "payload": "{\"tool_name\": \"Bash\", \"tool_input\": {\"command\": \"export K=sk-ant-api03-abcdefghijklmnopqrst9\"}}", "expect": "block"}
+{"id": "unrec_clean", "payload": "{\"tool_name\": \"Bash\", \"tool_input\": {\"command\": \"export K=ls -la\"}}", "expect": "warn"}
