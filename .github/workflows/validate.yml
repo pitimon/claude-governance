@@ -49,7 +49,10 @@ jobs:
       - name: session-start.ps1 emits valid JSON matching session-start.sh
         shell: powershell
         run: |
-          $ps = & .\hooks\session-start.ps1 | Out-String
+          # Invoke as a child process so the hook's real stdout (written via
+          # [Console]::Out.Write, the stream Claude Code reads) is captured —
+          # a same-process `& .\script` would miss it. Strip a leading BOM.
+          $ps = (powershell -NoProfile -ExecutionPolicy Bypass -File .\hooks\session-start.ps1 | Out-String).TrimStart([char]0xFEFF)
           $obj = $ps | ConvertFrom-Json   # throws if invalid JSON
           if ($obj.hookSpecificOutput.hookEventName -ne 'SessionStart') { throw 'wrong hookEventName' }
           if (-not $obj.hookSpecificOutput.additionalContext) { throw 'empty additionalContext' }
