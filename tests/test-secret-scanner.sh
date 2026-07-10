@@ -149,6 +149,52 @@ else
 fi
 
 # ============================================================
+# Fail-open regression — parse robustness (v3.4.4)
+# ============================================================
+# Before v3.4.4 the tool_name was extracted with a grep that only matched
+# compact JSON. A payload with a space after the colon produced an empty
+# tool_name, fell through to a silent `exit 0`, and let secrets pass — the
+# security control disabled itself. These assert the python3 parse + raw-scan
+# fallback so no payload shape can silently allow a secret.
+# (Secret is assembled at runtime from parts so the plugin's own live hook does
+# not block edits to this file — the source bytes never hold a contiguous key.)
+printf "\n\033[1;36m[Fail-open regression — parse robustness]\033[0m\n"
+
+SK="sk-ant-""api03-abcdefghijklmnopqrst9"
+
+# Spaced JSON (space after every colon) — the exact shape that used to bypass.
+SPACED=$(printf '{"tool_name": "Write", "tool_input": {"content": "key = %s"}}' "$SK")
+if echo "$SPACED" | bash "$SCANNER" >/dev/null 2>&1; then
+  fail "spaced-JSON payload with secret should block (fail-open regression)"
+else
+  pass "spaced-JSON payload with secret blocked"
+fi
+
+# Unparseable payload with a secret in the raw bytes — fallback must scan raw.
+if printf 'not valid json but contains %s inline' "$SK" | bash "$SCANNER" >/dev/null 2>&1; then
+  fail "unparseable payload with secret should block (raw-scan fallback)"
+else
+  pass "unparseable payload with secret blocked via raw-scan fallback"
+fi
+
+# Unrecognized tool with a secret in tool_input — fallback must scan raw.
+UNREC=$(printf '{"tool_name":"Bash","tool_input":{"command":"export K=%s"}}' "$SK")
+if echo "$UNREC" | bash "$SCANNER" >/dev/null 2>&1; then
+  fail "unrecognized tool carrying a secret should block (raw-scan fallback)"
+else
+  pass "unrecognized tool carrying a secret blocked via raw-scan fallback"
+fi
+
+# Parse failure with no secret must WARN (not silently allow) and exit 0.
+UNREC_CLEAN='{"tool_name":"Bash","tool_input":{"command":"ls -la"}}'
+stderr_out=$(echo "$UNREC_CLEAN" | bash "$SCANNER" 2>&1 >/dev/null); rc=$?
+if [[ $rc -eq 0 ]] && echo "$stderr_out" | grep -q "WARNING"; then
+  pass "parse-failure without secret warns and allows (never silent)"
+else
+  fail "parse-failure without secret should warn+allow (exit=$rc)"
+fi
+
+# ============================================================
 # Summary
 # ============================================================
 printf "\n\033[1m=== Summary ===\033[0m\n"

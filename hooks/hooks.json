@@ -16,7 +16,7 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/secret-scanner.sh",
-            "timeout": 500
+            "timeout": 5
           }
         ],
         "matcher": "Edit|Write|MultiEdit"
