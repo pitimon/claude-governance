@@ -12,3 +12,6 @@ service-account*.json
 .idea/
 .vscode/
 *.swp
+
+# NotebookLM promo artifacts (generated, not tracked)
+promo/
