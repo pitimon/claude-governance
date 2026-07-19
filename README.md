@@ -105,7 +105,7 @@ Every task is classified on two axes: **who drives** (Three Loops) and **how bad
 
 **Go deeper:**
 
-- **[docs/reference.md](docs/reference.md)** — full feature reference: every hook, skill, check, template, rule, platform note, and the token budget.
+- **[docs/reference.md](docs/reference.md)** — worked usage examples plus the full feature reference: every hook, skill, check, template, rule, platform note, and the token budget.
 - **Compliance** — [DSGAI](docs/compliance/DSGAI-MAPPING.md) · [EU AI Act](docs/compliance/EU-AI-ACT-MAPPING.md) · [ISO 42001](docs/compliance/ISO-42001-MAPPING.md) · [NIST AI RMF](docs/compliance/NIST-AI-RMF-MAPPING.md).
 - **[Agent-harness coverage (ETCLOVG)](docs/architecture/etclovg-coverage.md)** — where this plugin is strong (`G`), partial (`C/L/V`), and deliberately out of scope (`E/T`). Adopter shorthand: use `claude-governance` for governance; pair with [`pitimon/devsecops-ai-team`](https://github.com/pitimon/devsecops-ai-team) for sandboxing (`E`) or MCP tooling (`T`).
 

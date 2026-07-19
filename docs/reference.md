@@ -3,6 +3,7 @@
 Full feature reference for `claude-governance`. The [README](../README.md) is the
 narrative overview; this is the lookup table.
 
+- [Usage examples](#usage-examples)
 - [Hooks (always-on)](#hooks-always-on)
 - [Skills & agent (on-demand)](#skills--agent-on-demand)
 - [Governance checks (31)](#governance-checks-31)
@@ -19,6 +20,76 @@ Compliance mappings and the agent-harness coverage map live in their own docs:
 [DSGAI](compliance/DSGAI-MAPPING.md) · [EU AI Act](compliance/EU-AI-ACT-MAPPING.md) ·
 [ISO 42001](compliance/ISO-42001-MAPPING.md) · [NIST AI RMF](compliance/NIST-AI-RMF-MAPPING.md) ·
 [ETCLOVG coverage](architecture/etclovg-coverage.md).
+
+---
+
+## Usage examples
+
+### Catch a leaked API key before it enters git
+
+The secret scanner runs on every `Edit`/`Write` and blocks the write before it reaches disk:
+
+```
+You: Write the config file with the API key
+
+Claude writes: api_key = "sk-ant-api03-xxxxx"
+
+  Governance: Blocked — Anthropic API key detected.
+  Use environment variables instead:
+    JS/TS:  const value = process.env.YOUR_SECRET
+    Python: value = os.environ['YOUR_SECRET']
+    Go:     value := os.Getenv("YOUR_SECRET")
+```
+
+### Run pre-commit governance checks
+
+```
+You: /governance-check pre-commit
+
+  ## Governance Check: pre-commit
+
+  ### Passed
+  - [x] No hardcoded secrets found
+  - [x] Input validation present (Zod schema)
+  - [x] File sizes within limits
+  - [x] No debug prints in production
+
+  ### Failed
+  - [ ] FAIL: `src/ml/loader.py:12` — torch.load() without weights_only=True [DSGAI04]
+  - [ ] FAIL: `src/api/handler.ts` — 847 lines (max 800)
+
+  Passed: 8/10 | Failed: 2
+```
+
+### Classify a task with Three Loops + Consequence
+
+```
+You: Format the deployment config and push to production
+
+Claude: This task is Out-of-Loop (formatting) BUT involves irreversible
+        consequence (production deploy). Per ADR-002 Consequence Override:
+        Irreversible → always In-the-Loop.
+
+        I'll format the file, but you should review and deploy manually.
+```
+
+### Initialize governance in a new project
+
+```
+You: /governance-setup
+
+  Step 1: Creating DOMAIN.md...
+  Step 2: Setting up docs/adr/
+  Step 3: Data Classification (Optional)
+  Step 3.5: Shadow AI Policy (Optional)
+  Step 4: Install Rules
+
+  Governance initialized:
+  - DOMAIN.md — edit to define your entities
+  - docs/adr/ADR-001 — governance adoption record
+  - DATA-CLASSIFICATION.md — data sensitivity levels
+  - shadow-ai-policy.md — approved AI tools
+```
 
 ---
 
