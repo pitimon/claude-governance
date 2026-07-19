@@ -42,6 +42,75 @@ notebooklm source list -n "$CORPUS_ID" --json | jq -r '.sources[].status' | sort
 # want: all "ready", zero "error"
 ```
 
+## Keeping the corpus fresh (refresh on release)
+
+The corpus does **not** auto-sync — the repo changes, the notebook does not. Refresh it by
+hand, not on a schedule; the durable thing is *knowing which files to push*, not a script
+(the CLI backend is an unofficial RPC that can break, so a sync script risks becoming dead
+code — build one only after a real, repeated refresh need, per friction-first doctrine).
+
+**When to refresh:** on each tagged release, or when any manifest file below materially
+changes (a new ADR, a new compliance mapping, a rewritten README). Create a fresh
+notebook titled with the new version (e.g. `claude-governance corpus v3.6.0`) rather than
+mutating the old one, so each corpus maps to a known repo state.
+
+**Provenance of the current corpus** (update these two lines whenever you rebuild):
+
+- Built from commit **`6cbcae7`** (v3.5.0), 2026-07-19.
+- Staleness check: `git log --oneline 6cbcae7..HEAD -- <manifest paths>` — any output means
+  the corpus is behind and should be rebuilt.
+
+### Corpus manifest (29 files — the exact set to push)
+
+```
+README.md
+CHANGELOG.md
+CLAUDE.md
+docs/INTEGRATION.md
+agents/governance-reviewer.md
+docs/architecture/etclovg-coverage.md
+docs/compliance/DSGAI-MAPPING.md
+docs/compliance/EU-AI-ACT-MAPPING.md
+docs/compliance/ISO-42001-MAPPING.md
+docs/compliance/NIST-AI-RMF-MAPPING.md
+docs/research/eu-ai-act-obligations.md
+docs/research/nist-ai-rmf-compliance-brief.md
+docs/research/nist-ai-rmf-toolkit-prd.md
+docs/adr/ADR-001-adopt-governance-framework.md
+docs/adr/ADR-002-consequence-based-authorization.md
+docs/adr/ADR-003-eu-ai-act-compliance-toolkit.md
+docs/adr/ADR-004-iso-42001-framework-selection.md
+docs/adr/ADR-005-nist-ai-rmf-cross-reference-doc.md
+docs/adr/ADR-006-hook-design-principle-write-vs-edit.md
+docs/adr/ADR-007-codex-native-packaging.md
+docs/adr/ADR-008-governance-reviewer-model-inherit.md
+skills/governance-check/SKILL.md
+skills/create-adr/SKILL.md
+skills/spec-driven-dev/SKILL.md
+skills/governance-setup/SKILL.md
+skills/eu-ai-act-check/SKILL.md
+skills/iso-42001-check/SKILL.md
+skills/eu-ai-act-check/reference.md
+skills/iso-42001-check/reference.md
+```
+
+**Pitch manifest (5 files — leaner set for promo media):** `README.md`, `CHANGELOG.md`,
+`docs/architecture/etclovg-coverage.md`, `docs/compliance/DSGAI-MAPPING.md`,
+`docs/INTEGRATION.md`.
+
+Rebuild loop (no script needed — paste the manifest into a file, then loop over it):
+
+```bash
+# Save the 29 manifest paths above into files.txt, then:
+CORPUS_ID=$(notebooklm create "claude-governance corpus vX.Y.Z" --json | jq -r .notebook.id)
+while IFS= read -r f; do
+  [ -f "$f" ] || { echo "MISSING: $f"; continue; }
+  notebooklm source add "./$f" --title "$f" -n "$CORPUS_ID" --json >/dev/null \
+    || echo "FAILED: $f"   # re-add any failures before proceeding
+done < files.txt
+notebooklm source list -n "$CORPUS_ID" --json | jq -r '.sources[].status' | sort | uniq -c
+```
+
 ## Objective A — grounded query loop (efficiency)
 
 Use this instead of re-reading docs when you need a cited governance answer:
