@@ -17,6 +17,16 @@
 
 ---
 
+## Contents
+
+**Start here:** [Why](#why-claude-governance) · [What you get on install](#what-happens-when-you-install-in-claude-code) · [Quick Start](#quick-start) · [Usage Examples](#real-world-usage-examples)
+
+**Reference:** [Features at a Glance](#features-at-a-glance) · [Core Concepts](#core-concepts) · [Architecture](#architecture) · [Platform Support](#platform-support) · [Token Budget](#token-budget)
+
+**Contribute:** [Project Structure](#project-structure) · [Development](#development) · [Contributing](#contributing) · [Companion Plugins](#companion-plugins) · [References](#references)
+
+---
+
 ## Why claude-governance?
 
 AI-assisted development is fast — but ungoverned AI is a liability.
@@ -400,18 +410,25 @@ claude-governance/
 │   ├── adr-template.md                # ADR template
 │   └── project-claude-md.example
 ├── docs/
-│   ├── adr/
+│   ├── INTEGRATION.md            # Companion-plugin integration stub (SSOT in 8-habit-ai-dev)
+│   ├── notebooklm-workflow.md    # NotebookLM ↔ Claude Code grounded-corpus workflow
+│   ├── adr/                      # 8 Architecture Decision Records
 │   │   ├── ADR-001-adopt-governance-framework.md
 │   │   ├── ADR-002-consequence-based-authorization.md
 │   │   ├── ADR-003-eu-ai-act-compliance-toolkit.md
 │   │   ├── ADR-004-iso-42001-framework-selection.md
 │   │   ├── ADR-005-nist-ai-rmf-cross-reference-doc.md
 │   │   ├── ADR-006-hook-design-principle-write-vs-edit.md
-│   │   └── ADR-007-codex-native-packaging.md
+│   │   ├── ADR-007-codex-native-packaging.md
+│   │   └── ADR-008-governance-reviewer-model-inherit.md
 │   ├── architecture/
 │   │   └── etclovg-coverage.md   # ETCLOVG 7-layer taxonomy map (Agent Harness Engineering)
-│   └── compliance/
-│       └── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
+│   ├── compliance/               # Framework mappings (4 files)
+│   │   ├── DSGAI-MAPPING.md       # 11 OWASP DSGAI controls mapped
+│   │   ├── EU-AI-ACT-MAPPING.md   # EU AI Act Arts 9-15 mapping
+│   │   ├── ISO-42001-MAPPING.md   # ISO/IEC 42001:2023 AIMS controls
+│   │   └── NIST-AI-RMF-MAPPING.md # NIST AI RMF 1.0 cross-reference
+│   └── research/                 # Compliance research briefs (EU AI Act, NIST AI RMF)
 ├── scripts/
 │   ├── install-rules.sh         # Rules installer with backup
 │   └── bump-version.sh          # Version sync across Claude + Codex manifests
@@ -466,7 +483,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 → **[docs/INTEGRATION.md](docs/INTEGRATION.md)** (local stub) — links to the canonical guide and notes governance-specific points (Three Loops + ADR-002, EU AI Act canonical role per ADR-003).
 
-Tested against `8-habit-ai-dev` 2.18.6 and `devsecops-ai-team` 10.14.1.
+Tested against `8-habit-ai-dev` 2.21.42 and `devsecops-ai-team` 10.15.0.
 
 ---
 
